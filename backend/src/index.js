@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-dotenv.config({path: "../env"})
+dotenv.config() // Change from "../env" to "./.env
 import app from './app.js'
 const PORT = process.env.PORT || 4000
 import connectDB from './db/connectdb.js'

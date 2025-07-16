@@ -19,7 +19,6 @@ const generateAccessAndRefreshToken = async (userId) =>{
 
 
 export const registerUser = asyncHandler(async (req, res) => {
-    console.log("Registering user with data:")
     const {fullName, username, email, password} = req.body
     if(
         [fullName, username, email, password].some((field) => field?.trim()==="")
@@ -71,7 +70,9 @@ export const loginUser = asyncHandler(async (req, res) => {
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
   const cookieOptions = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: 'lax', // Add sameSite policy
+        maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     }
 
   return res
@@ -99,7 +100,8 @@ export const logoutUser = asyncHandler(async (req,res)=>{
     )
     const cookieOptions = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: 'lax'
     }
     return res.status(200)
     .clearCookie("accessToken",cookieOptions)
