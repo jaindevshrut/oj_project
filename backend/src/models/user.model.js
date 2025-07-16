@@ -1,27 +1,28 @@
 import mongoose from "mongoose";
-import jwt from 'jsonwebtoken'
-
+import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt"
 const userSchema = new mongoose.Schema({
     accType: {
         type: String,
         required: true,
-        enum: ["User", "Admin"]
+        enum: ["User", "Admin"],
+        default: "User"
     },
     avatar: {
         type: String,
         default: "https://www.svgrepo.com/show/452030/avatar-default.svg"
     },
-    name: {
+    fullName: {
         type: String,
         required: [true, 'Please enter your name']
     },
-    Gender: {
+    gender: {
         type: String,
         default: "N",
         enum: ["M", "F", "O", "N"],
         required: [true, 'Please select gender']
     },
-    Location: {
+    location: {
         type: String,
     },
     website: {
@@ -46,6 +47,9 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Please enter password"]
+    },
+    refreshToken: {  // Add this missing field
+        type: String
     },
     submissions: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -80,6 +84,16 @@ userSchema.methods.generateAccessToken = function () {
     )
 }
 
+userSchema.methods.generateRefreshToken = function (){
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,{
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 const User = mongoose.model('User', userSchema)
 

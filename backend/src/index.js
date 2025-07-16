@@ -1,20 +1,18 @@
-import express from 'express'
-import cors from 'cors'
-const app = express()
+import dotenv from "dotenv"
+dotenv.config({path: "../env"})
+import app from './app.js'
 const PORT = process.env.PORT || 4000
-
-
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-}))
-app.use(express.json({limit: "16kb"}))  
-app.use(express.urlencoded({extended: true}))
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World')
+import connectDB from './db/connectdb.js'
+connectDB().then(()=>{
+    app.on("error", (error)=>{
+        console.error("Error: ", error)
+        throw error
+    }) // using for listining the error event
+    app.listen(PORT, ()=>{
+        console.log(`Server is running on port ${PORT}`)
+    })
 })
-
-app.listen(PORT, () => {
-    console.log('listening on port :' + PORT);
+.catch((error)=>{
+    console.error("Error: ", error)
+    process.exit(1)
 })
