@@ -1,58 +1,45 @@
 import fs from 'fs';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { fileURLToPath } from 'url';
-
-// Get __dirname equivalent for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const execAsync = promisify(exec);
-const outputDir = path.join(__dirname, '../output');
-const codesDir = path.join(__dirname, '../codes');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const outputDir = path.join(__dirname, 'output');
+const codesDir = path.join(__dirname, 'codes');
 
 if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
 }
 
-const executeFile = async (fileName, input = '') => {
+const executeFile = async (filePath, inputFile) => {
     try {
-        const jobId = path.basename(fileName, path.extname(fileName));
-        const extension = path.extname(fileName);
-        const filePath = path.join(codesDir, fileName);
-        
-        // Check if file exists
-        if (!fs.existsSync(filePath)) {
-            return {
-                success: false,
-                error: 'File not found'
-            };
-        }
-
+        const jobId = path.basename(filePath).split('.')[0];
+        const extension = path.extname(filePath);
         let outputFilePath = path.join(outputDir, jobId);
         let compileCommand = '';
         let runCommand = '';
 
         switch(extension) {
             case '.c':
-                outputFilePath += '.exe'; // For Windows compatibility
+                outputFilePath += '.exe';
                 compileCommand = `gcc "${filePath}" -o "${outputFilePath}"`;
-                runCommand = `"${outputFilePath}"`;
+                runCommand = `"${outputFilePath}" < "${inputFile}"`;
                 break;
             case '.cpp':
                 outputFilePath += '.exe';
                 compileCommand = `g++ "${filePath}" -o "${outputFilePath}"`;
-                runCommand = `"${outputFilePath}"`;
+                runCommand = `"${outputFilePath}" < "${inputFile}"`;
                 break;
             case '.java':
-                // Compile Java first
-                compileCommand = `javac "${filePath}"`;
-                const javaClassName = path.basename(fileName, '.java');
-                runCommand = `java -cp "${codesDir}" ${javaClassName}`;
+                runCommand = `java ${filePath} < "${inputFile}"`;
                 break;
             case '.py':
-                runCommand = `python "${filePath}"`;
+                runCommand = `python "${filePath}" < "${inputFile}"`;
                 break;
             default:
                 return {
@@ -61,7 +48,6 @@ const executeFile = async (fileName, input = '') => {
                 };
         }
 
-        // Compilation step (if needed)
         if (compileCommand) {
             try {
                 console.log('Compiling:', compileCommand);
@@ -89,14 +75,12 @@ const executeFile = async (fileName, input = '') => {
         try {
             console.log('Executing:', runCommand);
             
-            // Set timeout to prevent infinite loops
             const { stdout, stderr } = await execAsync(runCommand, { 
-                timeout: 10000, // 10 seconds timeout
-                input: input 
+                timeout: 10000 // 10 seconds timeout
             });
 
             // Clean up temporary files
-            cleanupFiles(fileName, outputFilePath, extension);
+            cleanupFiles(filePath, outputFilePath, extension);
 
             if (stderr && !stderr.includes('warning')) {
                 return {
@@ -115,7 +99,7 @@ const executeFile = async (fileName, input = '') => {
 
         } catch (executionError) {
             // Clean up on error
-            cleanupFiles(fileName, outputFilePath, extension);
+            cleanupFiles(filePath, outputFilePath, extension);
             
             return {
                 success: false,
@@ -135,10 +119,8 @@ const executeFile = async (fileName, input = '') => {
     }
 };
 
-// Helper function to clean up temporary files
-const cleanupFiles = (fileName, outputFilePath, extension) => {
+const cleanupFiles = (filePath, outputFilePath, extension) => {
     try {
-        const filePath = path.join(codesDir, fileName);
         
         // Remove source file
         if (fs.existsSync(filePath)) {

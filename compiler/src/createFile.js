@@ -1,31 +1,28 @@
 import fs from 'fs';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
-// Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
-const codesDir = path.join(__dirname, '../codes');
+const dirCodes = path.join(__dirname, 'codes');
 
-if(!fs.existsSync(codesDir)) {
-    fs.mkdirSync(codesDir, { recursive: true });
+if(!fs.existsSync(dirCodes)) {
+    fs.mkdirSync(dirCodes, { recursive: true });
 }
 
 const createFile = (extension, content) => {
     try {
         const jobId = uuidv4();
         const fileName = `${jobId}.${extension}`;
-        const filePath = path.join(codesDir, fileName);
+        const filePath = path.join(dirCodes, fileName);
         
         fs.writeFileSync(filePath, content);
         
         return {
             success: true,
-            fileName,
             filePath,
-            jobId
         };
     } catch (error) {
         console.error('Error creating file:', error);
