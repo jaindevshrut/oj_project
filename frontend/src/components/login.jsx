@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import InputField, { MailIcon, LockIcon } from './Inputfield';
+import InputField, { MailIcon, LockIcon, UserIcon } from './Inputfield';
 import { useNavigate } from 'react-router-dom';
 import {ToastContainer} from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
@@ -32,16 +32,7 @@ export default function Login({ onToggleForm }) {
           const result = await response.json();
           if (response.ok) {
             handleSuccess("Login successful!");
-
-            if (result.data?.user) {
-          localStorage.setItem('user', JSON.stringify(result.data.user));
-        }
-        
-        // Optional: Store access token in localStorage as backup
-        if (result.data?.accessToken) {
-          localStorage.setItem('accessToken', result.data.accessToken);
-        }
-
+            
             setTimeout(() => {
               navigate('/dashboard'); // Redirect to dashboard after login
             }, 2000);
@@ -59,7 +50,7 @@ export default function Login({ onToggleForm }) {
       <p className="text-center text-gray-400 mb-8">Login to access your dashboard</p>
       
       <form onSubmit={handleSubmit}>
-        <InputField icon={<MailIcon />} type="email" name="email" placeholder="Email" onChange={handleChange} autoFocus={true} />
+        <InputField icon={<UserIcon />} type="text" name="email" placeholder="Username or Email" onChange={handleChange} autoFocus={true} />
         <InputField icon={<LockIcon />} type="password" name="password" placeholder="Password" isPassword={true} onChange={handleChange} />
         <div className="text-right mb-6">
           <a href="#" className="text-sm text-purple-400 hover:text-purple-300 transition duration-300">

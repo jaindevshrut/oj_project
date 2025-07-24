@@ -10,7 +10,7 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
         navigate('/auth');
     };
 
-    const handleLogout = async () => {
+const handleLogout = async () => {
         if (isLoggingOut) return; // Prevent multiple logout requests
         
         setIsLoggingOut(true);
@@ -25,11 +25,7 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
             });
 
             if (response.ok) {
-                // Clear local storage
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('user');
-                
-                // Update authentication state
+                console.log("logggg")
                 setIsAuthenticated(false);
                 
                 handleSuccess("Logout successful!");
@@ -58,28 +54,37 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-10">
-            <nav className="container mx-auto px-6 py-3">
-                <div className="flex justify-between items-center bg-black/30 backdrop-blur-lg border border-white/10 rounded-full px-6 py-2">
-                    <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => navigate('/')}>
-                        OnlineJudge
-                    </h1>
-                    <div className="flex items-center space-x-4">
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Problems</a>
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Submissions</a>
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Leaderboard</a>
+    <header className="fixed top-0 left-0 right-0 z-10">
+        <nav className="container mx-auto px-6 py-3">
+            <div className="flex justify-between items-center bg-black/30 backdrop-blur-lg border border-white/10 rounded-full px-6 py-2">
+                <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => navigate('/')}>
+                    OnlineJudge
+                </h1>
+                <div className="flex items-center space-x-4">
+                    <a href="#" className="text-gray-300 hover:text-white transition-colors">Problems</a>
+                    <a href="#" className="text-gray-300 hover:text-white transition-colors">Submissions</a>
+                    <a href="#" className="text-gray-300 hover:text-white transition-colors">Leaderboard</a>
+                    {/* Add Code Editor link for authenticated users */}
+                    {isAuthenticated && (
                         <button 
-                            className={`text-gray-300 hover:text-white transition-colors px-4 py-2 rounded-lg border border-transparent hover:border-white/20 ${
-                                isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                            onClick={handleButtonClick}
-                            disabled={isLoggingOut}
+                            onClick={() => navigate('/code')}
+                            className="text-gray-300 hover:text-white transition-colors"
                         >
-                            {isLoggingOut ? 'Logging out...' : (isAuthenticated ? 'Logout' : 'Login')}
+                            Code Editor
                         </button>
-                    </div>
+                    )}
+                    <button 
+                        className={`text-gray-300 hover:text-white transition-colors px-4 py-2 rounded-lg border border-transparent hover:border-white/20 ${
+                            isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        onClick={handleButtonClick}
+                        disabled={isLoggingOut}
+                    >
+                        {isLoggingOut ? 'Logging out...' : (isAuthenticated ? 'Logout' : 'Login')}
+                    </button>
                 </div>
-            </nav>
-        </header>
-    );
+            </div>
+        </nav>
+    </header>
+);
 }

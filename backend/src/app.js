@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import multer from "multer"
-const app = express()
+const app = express() // instead of this use cors
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,

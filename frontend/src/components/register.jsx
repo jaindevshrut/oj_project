@@ -1,8 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import InputField, { UserIcon, MailIcon, LockIcon } from './Inputfield';
 import {ToastContainer} from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 export default function Register({ onToggleForm }) {
+  const [token, setToken] = useState(null);
+  const captchaRef = useRef(null);
+
+  const onLoad = () => {
+    // this reaches out to the hCaptcha JS API and runs the
+    // execute function on it. you can use other functions as
+    // documented here:
+    // https://docs.hcaptcha.com/configuration#jsapi
+    captchaRef.current.execute();
+  };
+
+  useEffect(() => {
+
+    if (token)
+      console.log(`hCaptcha Token: ${token}`);
+
+  }, [token]);
     const [registerInfo, setRegisterInfo] = useState({
       fullName: '',
       username: '',
@@ -43,8 +61,10 @@ export default function Register({ onToggleForm }) {
         return handleError("Registration failed. Try again. : " + err.message);
       }
     };
+    
   return (
     <>
+  
       <h2 className="text-3xl font-bold text-center mb-2">Create Account</h2>
       <p className="text-center text-gray-400 mb-8">Sign up to get started</p>
       
@@ -54,6 +74,12 @@ export default function Register({ onToggleForm }) {
         <InputField icon={<MailIcon />} type="email" name="email" placeholder="Email" onChange={handleChange} />
         {/* Added isPassword prop to enable the visibility toggle */}
         <InputField icon={<LockIcon />} type="password" name="password" placeholder="Password" isPassword={true} onChange={handleChange} />
+        {/* <HCaptcha
+        sitekey={import.meta.env.VITE_SECRET_KEY}
+        onLoad={onLoad}
+        onVerify={setToken}
+        ref={captchaRef}
+      /> */}
         <button
           type="submit"
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition duration-300 transform hover:scale-105 mt-4"

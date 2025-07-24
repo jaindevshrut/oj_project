@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import Header from './components/Header';
 import Auth from './pages/auth.jsx';
+import Code from './pages/code.jsx';
 import Dashboard from './pages/dashboard.jsx';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import RefreshHandler from './refreshHandler.jsx';
-
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -20,6 +20,7 @@ export default function App() {
         <Route path='/' element={<Navigate to="/auth" replace />} />
         <Route path='/auth' element={<Auth />} />
         <Route path='/dashboard' element={<PrivateRoute element={<Dashboard />} />} />
+        <Route path='/code' element={<Code />}/>
       </Routes>
     </div>
   );
