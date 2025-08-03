@@ -8,12 +8,12 @@ const __dirname = dirname(__filename);
 
 const dirCodes = path.join(__dirname, 'codes');
 
-if(!fs.existsSync(dirCodes)) {
-    fs.mkdirSync(dirCodes, { recursive: true });
-}
 
 const createFile = (extension, content) => {
     try {
+        if(!fs.existsSync(dirCodes)) {
+            fs.mkdirSync(dirCodes, { recursive: true });
+        }
         const jobId = uuidv4();
         const fileName = `${jobId}.${extension}`;
         const filePath = path.join(dirCodes, fileName);

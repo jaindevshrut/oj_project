@@ -12,12 +12,12 @@ const __dirname = dirname(__filename);
 const outputDir = path.join(__dirname, 'output');
 const codesDir = path.join(__dirname, 'codes');
 
-if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-}
 
 const executeFile = async (filePath, inputFile) => {
     try {
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
         const jobId = path.basename(filePath).split('.')[0];
         const extension = path.extname(filePath);
         let outputFilePath = path.join(outputDir, jobId);
@@ -50,7 +50,6 @@ const executeFile = async (filePath, inputFile) => {
 
         if (compileCommand) {
             try {
-                console.log('Compiling:', compileCommand);
                 const { stdout: compileStdout, stderr: compileStderr } = await execAsync(compileCommand);
                 
                 if (compileStderr && !compileStderr.includes('warning')) {
@@ -61,7 +60,6 @@ const executeFile = async (filePath, inputFile) => {
                     };
                 }
                 
-                console.log('Compilation successful');
             } catch (compileError) {
                 return {
                     success: false,
@@ -73,7 +71,6 @@ const executeFile = async (filePath, inputFile) => {
 
         // Execution step
         try {
-            console.log('Executing:', runCommand);
             
             const { stdout, stderr } = await execAsync(runCommand, { 
                 timeout: 10000 // 10 seconds timeout

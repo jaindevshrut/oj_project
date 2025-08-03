@@ -9,12 +9,12 @@ const __dirname = dirname(__filename);
 
 const inputDir = path.join(__dirname, 'input');
 
-if(!fs.existsSync(inputDir)) {
-    fs.mkdirSync(inputDir, { recursive: true });
-}
 
 const createInputFile = (content) => {
     try {
+        if(!fs.existsSync(inputDir)) {
+            fs.mkdirSync(inputDir, { recursive: true });
+        }
         const jobId = uuidv4();
         const fileName = `${jobId}.txt`;
         const filePath = path.join(inputDir, fileName);

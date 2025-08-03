@@ -32,10 +32,12 @@ export default function Login({ onToggleForm }) {
           const result = await response.json();
           if (response.ok) {
             handleSuccess("Login successful!");
-            
             setTimeout(() => {
               navigate('/dashboard'); // Redirect to dashboard after login
             }, 2000);
+            console.log("User data:", JSON.stringify(result.user));
+            localStorage.setItem('user', JSON.stringify(result));
+            console.log("Devvv",result.user.avatar);
           } else {
             const errorMessage = result.message || "Login failed";
             handleError(errorMessage);

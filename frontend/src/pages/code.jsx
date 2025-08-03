@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
+import Modal from '../components/Modal.jsx';
+import AIReview from '../components/AIReview.jsx';
 
 // Import languages in the correct dependency order
 import 'prismjs/components/prism-clike';    // C-like must come first (base for many languages)
@@ -19,6 +21,7 @@ function Code() {
   const [input, setInput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const languageOptions = [
     { value: 'python', label: 'Python', prismLang: languages.python },
@@ -32,13 +35,6 @@ function Code() {
     java: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
     cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`,
     c: `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
-  };
-
-  const inputTemplates = {
-    python: `# Example for input:\n# name = input()\n# print(f"Hello, {name}!")`,
-    java: `// Example for input:\n// Scanner sc = new Scanner(System.in);\n// String name = sc.nextLine();\n// System.out.println("Hello, " + name + "!");`,
-    cpp: `// Example for input:\n// string name;\n// cin >> name;\n// cout << "Hello, " << name << "!" << endl;`,
-    c: `// Example for input:\n// char name[100];\n// scanf("%s", name);\n// printf("Hello, %s!\\n", name);`,
   };
 
   const handleLanguageChange = (language) => {
@@ -64,7 +60,7 @@ function Code() {
     setIsError(false);
 
     try {
-      const response = await fetch('http://localhost:3000/compile', {
+      const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/compile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,8 +115,21 @@ function Code() {
     setIsError(false);
   };
 
+  const openReviewModal = () => {
+    if (!code.trim()) {
+      setOutput(formatOutput('Please write some code before requesting a review.'));
+      setIsError(true);
+      return;
+    }
+    setIsReviewModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setIsReviewModalOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 pt-20 relative">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -130,7 +139,7 @@ function Code() {
           </div>
 
           {/* Main Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-5">
             
             {/* Code Editor - Left Side */}
             <div className="lg:col-span-2">
@@ -154,7 +163,7 @@ function Code() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={clearAll}
                         className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-colors text-sm"
@@ -167,6 +176,18 @@ function Code() {
                       >
                         Reset
                       </button>
+                      
+                      {/* AI Review Button */}
+                      <button
+                        onClick={openReviewModal}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center gap-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        AI Review
+                      </button>
+                      
                       <button
                         onClick={runCode}
                         disabled={isRunning}
@@ -228,15 +249,12 @@ function Code() {
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={inputTemplates[selectedLanguage] || "Enter test input here...\n\nExample:\n5\nHello World"}
+                    placeholder="Enter your test case input here..."
                     className="w-full h-32 bg-gray-900/50 text-white border border-gray-600/50 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none font-mono text-sm"
                     style={{
                       fontFamily: '"Fira Code", "Consolas", "Monaco", monospace',
                     }}
                   />
-                  <div className="mt-2 text-xs text-gray-400">
-                    💡 Tip: Each line will be sent as separate input to your program
-                  </div>
                 </div>
               </div>
 
@@ -246,10 +264,10 @@ function Code() {
                   <div className="flex items-center justify-between">
                     <span className="text-white font-medium">Output</span>
                     {isError && (
-                      <span className="text-red-400 text-xs">❌ Error</span>
+                      <span className="text-red-400 text-xs">Error</span>
                     )}
                     {!isError && output && output !== '> Running code...' && (
-                      <span className="text-green-400 text-xs">✅ Success</span>
+                      <span className="text-green-400 text-xs">Success</span>
                     )}
                   </div>
                 </div>
@@ -261,44 +279,23 @@ function Code() {
                   </pre>
                 </div>
               </div>
-
-              {/* Quick Actions */}
-              <div className="bg-gray-800/50 backdrop-blur-lg border border-gray-600/50 rounded-lg p-4">
-                <h3 className="text-white font-medium mb-3">Quick Actions</h3>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setInput('')}
-                    className="w-full bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                  >
-                    Clear Input
-                  </button>
-                  <button
-                    onClick={() => setOutput('')}
-                    className="w-full bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                  >
-                    Clear Output
-                  </button>
-                  <button
-                    onClick={() => {
-                      const sampleInputs = {
-                        python: "Alice\n25",
-                        java: "World\n42",
-                        cpp: "CodeEditor\n100",
-                        c: "Test\n123"
-                      };
-                      setInput(sampleInputs[selectedLanguage] || "Sample\n123");
-                    }}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors text-sm"
-                  >
-                    Load Sample Input
-                  </button>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isReviewModalOpen}
+        onClose={closeReviewModal}
+        title="AI Code Review"
+        maxWidth="max-w-4xl"
+      >
+        <AIReview
+          code={code}
+          language={selectedLanguage}
+          onClose={closeReviewModal}
+        />
+      </Modal>
     </div>
   );
 }

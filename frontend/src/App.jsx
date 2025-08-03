@@ -20,7 +20,7 @@ export default function App() {
         <Route path='/' element={<Navigate to="/auth" replace />} />
         <Route path='/auth' element={<Auth />} />
         <Route path='/dashboard' element={<PrivateRoute element={<Dashboard />} />} />
-        <Route path='/code' element={<Code />}/>
+        <Route path='/code' element={<PrivateRoute element={<Code />} />} />
       </Routes>
     </div>
   );
