@@ -97,15 +97,28 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
                 className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
             >
                 {/* Avatar */}
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {user?.avatar ? (
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium overflow-hidden">
+                    {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" ? (
                         <img 
                             src={user.avatar} 
                             alt="Avatar" 
                             className="w-8 h-8 rounded-full object-cover"
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                            }}
                         />
                     ) : (
-                        getUserInitials(user?.username)
+                        <span>{getUserInitials(user?.username)}</span>
+                    )}
+                    {/* Fallback for broken images */}
+                    {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" && (
+                        <div 
+                            className="w-8 h-8 flex items-center justify-center text-white text-sm font-medium"
+                            style={{ display: 'none' }}
+                        >
+                            <span>{getUserInitials(user?.username)}</span>
+                        </div>
                     )}
                 </div>
                 
@@ -131,15 +144,28 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
                     {/* User Info Section */}
                     <div className="px-4 py-3 border-b border-gray-700">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-                                {user?.avatar ? (
+                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium overflow-hidden">
+                                {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" ? (
                                     <img 
                                         src={user.avatar} 
                                         alt="Avatar" 
                                         className="w-10 h-10 rounded-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
                                     />
                                 ) : (
-                                    getUserInitials(user?.username)
+                                    <span>{getUserInitials(user?.username)}</span>
+                                )}
+                                {/* Fallback for broken images */}
+                                {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" && (
+                                    <div 
+                                        className="w-10 h-10 flex items-center justify-center text-white font-medium"
+                                        style={{ display: 'none' }}
+                                    >
+                                        <span>{getUserInitials(user?.username)}</span>
+                                    </div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">

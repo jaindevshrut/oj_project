@@ -3,6 +3,8 @@ import Header from './components/Header';
 import Auth from './pages/auth.jsx';
 import Code from './pages/code.jsx';
 import Dashboard from './pages/dashboard.jsx';
+import Profile from './pages/profile.jsx';
+import EditProfile from './pages/edit-profile.jsx';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import RefreshHandler from './refreshHandler.jsx';
 export default function App() {
@@ -21,6 +23,8 @@ export default function App() {
         <Route path='/auth' element={<Auth />} />
         <Route path='/dashboard' element={<PrivateRoute element={<Dashboard />} />} />
         <Route path='/code' element={<PrivateRoute element={<Code />} />} />
+        <Route path='/profile' element={<PrivateRoute element={<Profile />} />} />
+        <Route path='/edit-profile' element={<PrivateRoute element={<EditProfile />} />} />
       </Routes>
     </div>
   );

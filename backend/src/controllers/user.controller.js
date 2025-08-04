@@ -3,6 +3,7 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/AsyncHandler.js";
 import jwt from "jsonwebtoken";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId)
@@ -131,4 +132,97 @@ export const checkAuth = asyncHandler(async (req, res) => {
     } catch {
         return res.status(401).json({ authenticated: false });
     }
+})
+
+export const getUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select("-password -refreshToken");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "Profile fetched successfully")
+    );
+});
+
+export const updateUserProfile = asyncHandler(async (req, res) => {
+    const { fullName, username, email, gender, location, website } = req.body;
+
+    // Check if username or email already exists (excluding current user)
+    if (username || email) {
+        const existingUser = await User.findOne({
+            $and: [
+                { _id: { $ne: req.user._id } },
+                {
+                    $or: [
+                        ...(username ? [{ username }] : []),
+                        ...(email ? [{ email }] : [])
+                    ]
+                }
+            ]
+        });
+
+        if (existingUser) {
+            throw new ApiError(400, "Username or email already exists");
+        }
+    }
+
+    // Prepare update data
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (username) updateData.username = username;
+    if (email) updateData.email = email;
+    if (gender) updateData.gender = gender;
+    if (location !== undefined) updateData.location = location;
+    if (website !== undefined) updateData.website = website;
+
+    // Handle avatar upload if provided
+    if (req.file) {
+        const avatarLocalPath = req.file?.path; 
+        if (!avatarLocalPath) {
+            return new ApiError(400, "Avatar file is missing")
+        }
+
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+        if (!avatar.url) {
+            throw new ApiError(400, "Error while uploading avatar")
+        }
+        const deleteResponce = await deleteFromCloudinary(req.user?.avatar)
+        console.log(deleteResponce)
+        updateData.avatar = avatar.url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: updateData },
+        { new: true, runValidators: true }
+    ).select("-password -refreshToken");
+
+    if (!updatedUser) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedUser, "Profile updated successfully")
+    );
+});
+
+export const getUserStats = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    // For now, return mock data since we don't have submissions implemented yet
+    // In a real application, you would calculate these from the database
+    const stats = {
+        totalSubmissions: Math.floor(Math.random() * 100) + 20,
+        acceptedSubmissions: "Comming Soon..",
+        problemsSolved: "Comming Soon..",
+        contestsParticipated: "Comming Soon..",
+        ranking: "Comming Soon..",
+        accuracyRate: "Comming Soon.."
+    };
+
+    return res.status(200).json(
+        new ApiResponse(200, stats, "User stats fetched successfully")
+    );
 })

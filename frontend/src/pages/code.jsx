@@ -139,7 +139,7 @@ function Code() {
           </div>
 
           {/* Main Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-8">
             
             {/* Code Editor - Left Side */}
             <div className="lg:col-span-2">

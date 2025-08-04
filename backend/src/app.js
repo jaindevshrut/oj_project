@@ -1,7 +1,12 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import multer from "multer"
+import path from "path"
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express() // instead of this use cors
 
 app.use(cors({
@@ -14,7 +19,8 @@ app.use(cors({
 app.use(express.json({limit: "16kb"})) // using for parsing the json data
 app.use(express.urlencoded({extended: true})) // using for parsing the form data (isse ham vo %20 ya + wali cheeze jo url me hoti h usse configure kr skte h) 
 app.use(express.static("public")) // using for serving the static files
-app.use(multer().none()) // using for parsing the multipart/form-data (isse ham file upload kr skte h)
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cookieParser()) // using for parsing the cookies
 
 
