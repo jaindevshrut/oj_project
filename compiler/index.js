@@ -4,6 +4,7 @@ import executeFile from "./src/executeFile.js";
 import createFile from "./src/createFile.js";
 import createInputFile from "./src/createInputFile.js";
 import aiReview from "./src/aiReview.js";
+import aiFeatureRequest from "./src/aiFeatures.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,11 +27,11 @@ app.get("/", (req, res) => {
     });
 });
 
-app.post("/compile", async (req, res) => {
+app.post("/run", async (req, res) => {
     try {
-        const { extension, content, input = '' } = req.body;
+        const { extension, code, input = '' } = req.body;
         // Validation
-        if (!extension || !content) {
+        if (!extension || !code) {
             return res.status(400).json({
                 success: false,
                 error: "Missing required fields",
@@ -50,8 +51,8 @@ app.post("/compile", async (req, res) => {
 
         // Create file
         console.log(`Creating file with extension: ${extension}`);
-        const fileResult = createFile(extension, content);
-        
+        const fileResult = createFile(extension, code);
+
         if (!fileResult.success) {
             return res.status(500).json({
                 success: false,
@@ -100,14 +101,14 @@ app.post("/compile", async (req, res) => {
 });
 app.post("/review", async (req, res) => {
     try {
-        const { content , language } = req.body;
-        if (!content) {
+        const { code , language } = req.body;
+        if (!code) {
             return res.status(400).json({
                 success: false,
-                error: "Missing content",
+                error: "Missing code",
             });
         }
-        const reviewResult = await aiReview(content, language);
+        const reviewResult = await aiReview(code, language);
         if (reviewResult.success) {
             return res.status(200).json({
                 success: true,
@@ -121,6 +122,40 @@ app.post("/review", async (req, res) => {
         }
     } catch (error) {
         console.error('Unexpected error in /review:', error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal Server Error",
+        });
+    }
+});
+
+// AI Feature endpoints for landing page
+app.post("/ai-feature", async (req, res) => {
+    try {
+        const { feature, code, language, problemDescription, constraints } = req.body;
+        
+        if (!feature || !code) {
+            return res.status(400).json({
+                success: false,
+                error: "Missing required fields",
+            });
+        }
+
+        const aiResult = await aiFeatureRequest(feature, code, language, problemDescription, constraints);
+        
+        if (aiResult.success) {
+            return res.status(200).json({
+                success: true,
+                result: aiResult.result
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                error: "AI Feature Failed",
+            });
+        }
+    } catch (error) {
+        console.error('Unexpected error in /ai-feature:', error);
         return res.status(500).json({
             success: false,
             error: "Internal Server Error",

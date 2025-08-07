@@ -41,3 +41,10 @@ export const isAdmin = (req, res, next) => {
   }
   next();
 };
+
+export const isProblemsetterOrAdmin = (req, res, next) => {
+  if (req.user.accType !== "Problemsetter" && req.user.accType !== "Admin") {
+    throw new ApiError(403, "Forbidden: problemsetter or admin access required");
+  }
+  next();
+};

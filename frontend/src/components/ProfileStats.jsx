@@ -144,27 +144,27 @@ const ProfileStats = ({ userId }) => {
             {statItems.map((item, index) => (
                 <div 
                     key={index}
-                    className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors"
+                    className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors border border-gray-200"
                 >
                     <div className="flex items-center space-x-3">
                         <div className={`${item.color}`}>
                             {item.icon}
                         </div>
                         <div>
-                            <p className="text-sm text-gray-400">{item.label}</p>
-                            <p className="text-lg font-semibold text-white">{item.value}</p>
+                            <p className="text-sm text-gray-600">{item.label}</p>
+                            <p className="text-lg font-semibold text-black">{item.value}</p>
                         </div>
                     </div>
                 </div>
             ))}
             
             {/* Accuracy Rate Progress Bar */}
-            <div className="col-span-2 bg-gray-700 rounded-lg p-4">
+            <div className="col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-400">Success Rate</span>
-                    <span className="text-sm text-white">{stats.accuracyRate}%</span>
+                    <span className="text-sm text-gray-600">Success Rate</span>
+                    <span className="text-sm text-black font-medium">{stats.accuracyRate}%</span>
                 </div>
-                <div className="w-full bg-gray-600 rounded-full h-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                         className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${stats.accuracyRate}%` }}

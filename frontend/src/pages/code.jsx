@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
+import Editor from '@monaco-editor/react';
 import Modal from '../components/Modal.jsx';
 import AIReview from '../components/AIReview.jsx';
-
-// Import languages in the correct dependency order
-import 'prismjs/components/prism-clike';    // C-like must come first (base for many languages)
-import 'prismjs/components/prism-c';        // C comes next
-import 'prismjs/components/prism-cpp';      // C++ depends on C
-import 'prismjs/components/prism-java';     // Java depends on clike
-import 'prismjs/components/prism-python';   // Python is independent
-
-// Import the dark theme
-import 'prismjs/themes/prism-dark.css';
 
 function Code() {
   const [code, setCode] = useState(`#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`);
@@ -24,14 +13,14 @@ function Code() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const languageOptions = [
-    { value: 'python', label: 'Python', prismLang: languages.python },
-    { value: 'java', label: 'Java', prismLang: languages.java },
-    { value: 'cpp', label: 'C++', prismLang: languages.cpp },
-    { value: 'c', label: 'C', prismLang: languages.c },
+    { value: 'py', label: 'Python', monacoLanguage: 'python' },
+    { value: 'java', label: 'Java', monacoLanguage: 'java' },
+    { value: 'cpp', label: 'C++', monacoLanguage: 'cpp' },
+    { value: 'c', label: 'C', monacoLanguage: 'c' },
   ];
 
   const codeTemplates = {
-    python: `def hello_world():\n    print("Hello, World!")\n\nhello_world()`,
+    py: `def hello_world():\n    print("Hello, World!")\n\nhello_world()`,
     java: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, World!");\n    }\n}`,
     cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`,
     c: `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
@@ -44,9 +33,9 @@ function Code() {
     setIsError(false);
   };
 
-  const getCurrentLanguage = () => {
-    const lang = languageOptions.find(lang => lang.value === selectedLanguage);
-    return lang ? lang.prismLang : languages.cpp;
+  const getMonacoLanguage = (language) => {
+    const lang = languageOptions.find(lang => lang.value === language);
+    return lang ? lang.monacoLanguage : 'javascript';
   };
 
   const formatOutput = (text, isError = false) => {
@@ -60,7 +49,7 @@ function Code() {
     setIsError(false);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/compile`, {
+      const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/run`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,23 +203,31 @@ function Code() {
                 
                 <div className="p-4">
                   <Editor
+                    height="400px"
+                    language={getMonacoLanguage(selectedLanguage)}
                     value={code}
-                    onValueChange={setCode}
-                    highlight={(code) => {
-                      try {
-                        return highlight(code, getCurrentLanguage(), selectedLanguage);
-                      } catch (error) {
-                        console.error('Highlight error:', error);
-                        return code;
-                      }
-                    }}
-                    className="min-h-[400px] focus:outline-none"
-                    style={{
-                      fontFamily: '"Fira Code", "Consolas", "Monaco", monospace',
+                    onChange={(value) => setCode(value || '')}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
                       fontSize: 14,
-                      lineHeight: 1.6,
-                      background: 'transparent',
-                      color: '#ffffff',
+                      lineNumbers: 'on',
+                      roundedSelection: false,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 4,
+                      wordWrap: 'on',
+                      folding: true,
+                      lineNumbersMinChars: 3,
+                      scrollbar: {
+                        vertical: 'auto',
+                        horizontal: 'auto',
+                        verticalScrollbarSize: 8,
+                        horizontalScrollbarSize: 8
+                      },
+                      renderLineHighlight: 'line',
+                      cursorStyle: 'line',
+                      fontFamily: '"Fira Code", "Consolas", "Monaco", monospace'
                     }}
                   />
                 </div>

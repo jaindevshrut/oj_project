@@ -157,21 +157,30 @@ const EditProfile = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+                    <p className="text-black font-medium">Loading profile...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 pt-20 pb-8">
-            <div className="container mx-auto px-6 max-w-2xl">
-                <div className="bg-gray-800 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold text-white">Edit Profile</h1>
+        <div className="min-h-screen bg-white pt-20 pb-8 relative overflow-hidden">
+            {/* Background with blur effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
+            <div className="absolute inset-0 backdrop-blur-sm"></div>
+            <div className="absolute left-1/4 top-1/4 w-[200px] h-[200px] rounded-full bg-black opacity-5 blur-[80px]"></div>
+            <div className="absolute right-1/4 bottom-1/4 w-[150px] h-[150px] rounded-full bg-gray-400 opacity-10 blur-[60px]"></div>
+            
+            <div className="relative container mx-auto px-6 max-w-2xl">
+                <div className="bg-white rounded-lg p-8 border-2 border-black shadow-xl backdrop-blur-lg">
+                    <div className="flex items-center justify-between mb-8">
+                        <h1 className="text-3xl font-bold text-black">Edit Profile</h1>
                         <button
                             onClick={() => navigate('/profile')}
-                            className="text-gray-400 hover:text-white transition-colors"
+                            className="text-black hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -179,7 +188,7 @@ const EditProfile = () => {
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center space-y-4">
                             <ProfileAvatar 
@@ -190,13 +199,13 @@ const EditProfile = () => {
                                 editable={true}
                                 onAvatarChange={handleAvatarChange}
                             />
-                            <p className="text-sm text-gray-400">Click on avatar to change profile picture</p>
+                            <p className="text-sm text-gray-600">Click on avatar to change profile picture</p>
                         </div>
 
                         {/* Form Fields */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Full Name *
                                 </label>
                                 <input
@@ -204,13 +213,13 @@ const EditProfile = () => {
                                     name="fullName"
                                     value={formData.fullName}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Username *
                                 </label>
                                 <input
@@ -218,13 +227,13 @@ const EditProfile = () => {
                                     name="username"
                                     value={formData.username}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Email *
                                 </label>
                                 <input
@@ -232,20 +241,20 @@ const EditProfile = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Gender
                                 </label>
                                 <select
                                     name="gender"
                                     value={formData.gender}
                                     onChange={handleInputChange}
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                 >
                                     <option value="N">Not specified</option>
                                     <option value="M">Male</option>
@@ -255,7 +264,7 @@ const EditProfile = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Location
                                 </label>
                                 <input
@@ -264,12 +273,12 @@ const EditProfile = () => {
                                     value={formData.location}
                                     onChange={handleInputChange}
                                     placeholder="Your location"
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                 />
                             </div>
 
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-black mb-2">
                                     Website
                                 </label>
                                 <input
@@ -278,17 +287,17 @@ const EditProfile = () => {
                                     value={formData.website}
                                     onChange={handleInputChange}
                                     placeholder="https://your-website.com"
-                                    className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 text-black rounded-lg border-2 border-gray-200 focus:border-black focus:outline-none transition-colors"
                                 />
                             </div>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-6">
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                className="flex-1 px-8 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                             >
                                 {saving ? 'Saving Changes...' : 'Save Changes'}
                             </button>
@@ -296,7 +305,7 @@ const EditProfile = () => {
                                 type="button"
                                 onClick={() => navigate('/profile')}
                                 disabled={saving}
-                                className="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                                className="flex-1 px-8 py-3 bg-white text-black border-2 border-black rounded-lg hover:bg-gray-100 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                             >
                                 Cancel
                             </button>

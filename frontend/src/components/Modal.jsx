@@ -32,13 +32,13 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-4xl' }) => 
       />
       
       {/* Modal Content */}
-      <div className={`relative bg-gray-800 rounded-xl border border-gray-600/50 shadow-2xl ${maxWidth} w-full max-h-[90vh] overflow-hidden`}>
+      <div className={`relative bg-white rounded-xl border-2 border-black shadow-2xl ${maxWidth} w-full max-h-[90vh] overflow-hidden backdrop-blur-lg`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-600/50">
-          <h2 className="text-xl font-semibold text-white">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b-2 border-gray-200">
+          <h2 className="text-xl font-semibold text-black">{title}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-1"
+            className="text-black hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -11,6 +11,7 @@ const dirCodes = path.join(__dirname, 'codes');
 
 const createFile = (extension, content) => {
     try {
+        console.log(extension)
         if(!fs.existsSync(dirCodes)) {
             fs.mkdirSync(dirCodes, { recursive: true });
         }

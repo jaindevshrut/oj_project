@@ -7,21 +7,39 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
     const navigate = useNavigate();
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-10">
+        <header className="fixed top-0 left-0 right-0 z-50">
             <nav className="container mx-auto px-6 py-3">
-                <div className="flex justify-between items-center bg-black/30 backdrop-blur-lg border border-white/10 rounded-xl px-6 py-2">
-                    <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => navigate('/')}>
-                        OnlineJudge
+                <div className="flex justify-between items-center bg-white/90 backdrop-blur-lg border-2 border-black rounded-xl px-6 py-3 shadow-lg">
+                    <h1 
+                        className="text-2xl font-bold text-black cursor-pointer hover:text-gray-700 transition-colors border-b-2 border-transparent hover:border-black" 
+                        onClick={() => navigate('/')}
+                    >
+                        CodeJudge
                     </h1>
-                    <div className="flex items-center space-x-4">
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Problems</a>
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Submissions</a>
-                        <a href="#" className="text-gray-300 hover:text-white transition-colors">Leaderboard</a>
+                    <div className="flex items-center space-x-6">
+                        <button 
+                            onClick={() => navigate('/')}
+                            className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
+                        >
+                            Home
+                        </button>
+                        <button 
+                            onClick={() => navigate('/problems')}
+                            className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
+                        >
+                            Problems
+                        </button>
+                        <button 
+                            onClick={() => navigate('/dashboard')}
+                            className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
+                        >
+                            Dashboard
+                        </button>
                         {/* Add Code Editor link for authenticated users */}
                         {isAuthenticated && (
                             <button 
                                 onClick={() => navigate('/code')}
-                                className="text-gray-300 hover:text-white transition-colors"
+                                className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
                             >
                                 Code Editor
                             </button>

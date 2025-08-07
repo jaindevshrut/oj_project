@@ -20,12 +20,19 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const { fullName, username, email, password } = req.body
+    const { fullName, username, email, password, accType } = req.body
     if (
         [fullName, username, email, password].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All Fields are required")
     }
+
+    // Validate account type
+    const validAccTypes = ["User", "Problemsetter", "Admin"];
+    if (accType && !validAccTypes.includes(accType)) {
+        throw new ApiError(400, "Invalid account type");
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({
         $or: [{ username }, { email }]
@@ -38,7 +45,8 @@ export const registerUser = asyncHandler(async (req, res) => {
         username,
         fullName,
         email,
-        password
+        password,
+        accType: accType || "User" // Default to "User" if not provided
     });
     const createdUser = await User.findById(newUser._id).select("-password -refreshToken")
     if (!createdUser) {
@@ -123,14 +131,29 @@ export const checkAuth = asyncHandler(async (req, res) => {
     }
 
     if (!token) {
-        return res.status(401).json({ authenticated: false });
+        return res.status(401).json(
+            new ApiResponse(401, null, "No token provided", false)
+        );
     }
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        return res.status(200).json({ authenticated: true, user: decoded });
-    } catch {
-        return res.status(401).json({ authenticated: false });
+        // Get full user data from database
+        const user = await User.findById(decoded._id).select("-password -refreshToken");
+        
+        if (!user) {
+            return res.status(401).json(
+                new ApiResponse(401, null, "User not found", false)
+            );
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200, user, "Authentication successful")
+        );
+    } catch (error) {
+        return res.status(401).json(
+            new ApiResponse(401, null, "Invalid token", false)
+        );
     }
 })
 

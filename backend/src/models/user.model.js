@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     accType: {
         type: String,
         required: true,
-        enum: ["User", "Admin"],
+        enum: ["User", "Problemsetter", "Admin"],
         default: "User"
     },
     avatar: {

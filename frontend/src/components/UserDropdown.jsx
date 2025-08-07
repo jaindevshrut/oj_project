@@ -81,7 +81,7 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
     if (!isAuthenticated) {
         return (
             <button 
-                className="text-gray-300 hover:text-white transition-colors px-4 py-2 rounded-lg border border-transparent hover:border-white/20"
+                className="text-black hover:text-gray-600 transition-colors px-4 py-2 rounded-lg border-2 border-black hover:bg-gray-100 font-medium"
                 onClick={handleLogin}
             >
                 Login
@@ -94,10 +94,10 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
             {/* User Avatar Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                className="flex items-center space-x-2 text-black hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100 border border-transparent hover:border-gray-300"
             >
                 {/* Avatar */}
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium overflow-hidden">
+                <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-sm font-medium overflow-hidden border-2 border-gray-300">
                     {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" ? (
                         <img 
                             src={user.avatar} 
@@ -140,11 +140,11 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border-2 border-black z-50 backdrop-blur-lg">
                     {/* User Info Section */}
-                    <div className="px-4 py-3 border-b border-gray-700">
+                    <div className="px-4 py-3 border-b-2 border-gray-200">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium overflow-hidden">
+                            <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium overflow-hidden border-2 border-gray-300">
                                 {user?.avatar && user.avatar !== "https://www.svgrepo.com/show/452030/avatar-default.svg" ? (
                                     <img 
                                         src={user.avatar} 
@@ -169,10 +169,10 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate">
+                                <p className="text-sm font-medium text-black truncate">
                                     {user?.username || 'User'}
                                 </p>
-                                <p className="text-sm text-gray-400 truncate">
+                                <p className="text-sm text-gray-600 truncate">
                                     {user?.email || 'user@example.com'}
                                 </p>
                             </div>
@@ -186,7 +186,7 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
                                 setIsOpen(false);
                                 navigate('/profile');
                             }}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                            className="flex items-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 hover:text-gray-800 transition-colors"
                         >
                             <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -194,11 +194,42 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
                             Account
                         </button>
 
-                        <div className="border-t border-gray-700 mt-1 pt-1">
+                        {/* Problem Management for Problemsetters and Admins */}
+                        {(user?.accType === 'Problemsetter' || user?.accType === 'Admin') && (
+                            <div className="border-t border-gray-200 mt-1 pt-1">
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        navigate('/my-problems');
+                                    }}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                                >
+                                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    My Problems
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        navigate('/create-problem');
+                                    }}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                                >
+                                    <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Create Problem
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="border-t border-gray-200 mt-1 pt-1">
                             <button
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}
-                                className={`flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-red-600 hover:text-white transition-colors ${
+                                className={`flex items-center w-full px-4 py-2 text-sm text-black hover:bg-red-50 hover:text-red-700 transition-colors ${
                                     isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                             >

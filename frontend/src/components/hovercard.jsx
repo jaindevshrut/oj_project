@@ -25,11 +25,11 @@ export default function HoverCard({ children, className }) {
   }, []);
 
   return (
-    <div ref={cardRef} className={`relative bg-gray-900/80 rounded-2xl border border-white/10 p-8 overflow-hidden group ${className}`}>
+    <div ref={cardRef} className={`relative bg-white/95 rounded-2xl border-2 border-black shadow-2xl overflow-hidden group backdrop-blur-lg ${className}`}>
         <div 
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{
-                background: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(168, 85, 247, 0.15), transparent 80%)`,
+                background: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), rgba(0, 0, 0, 0.05), transparent 80%)`,
             }}
         />
         <div className="relative z-10">
