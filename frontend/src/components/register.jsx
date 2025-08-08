@@ -42,7 +42,7 @@ export default function Register({ onToggleForm }) {
         return handleError("Please fill all fields");
       }
       try{
-        const url = `${import.meta.env.VITE_BACKEND_BASE_URL}/users/register`;
+        const url = '/api/v1/users/register';
         const response = await fetch(url, {
           method: 'POST',
           headers: {

@@ -45,7 +45,7 @@ const ProfileAvatar = ({
     return (
         <div className="relative inline-block">
             <div 
-                className={`${sizeClasses[size]} bg-blue-600 rounded-full flex items-center justify-center text-white font-medium overflow-hidden border-2 border-gray-600 ${
+                className={`${sizeClasses[size]} bg-white-600 rounded-full flex items-center justify-center text-white font-medium overflow-hidden border-2 border-dotted border-black ${
                     editable ? 'cursor-pointer hover:border-blue-500 transition-colors' : ''
                 }`}
                 onClick={handleClick}

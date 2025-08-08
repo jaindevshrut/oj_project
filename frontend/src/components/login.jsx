@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import InputField, { MailIcon, LockIcon, UserIcon } from './Inputfield';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {ToastContainer} from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
 
@@ -10,6 +11,7 @@ export default function Login({ onToggleForm }) {
     password: ''
   });
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +25,7 @@ export default function Login({ onToggleForm }) {
           return handleError("Please fill all fields");
         }
         try{
-          const url = `${import.meta.env.VITE_BACKEND_BASE_URL}/users/login`;
+          const url = '/api/v1/users/login';
           const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -38,14 +40,12 @@ export default function Login({ onToggleForm }) {
           if (response.ok && result.success) {
             handleSuccess("Login successful!");
             
-            // Store user data correctly from the new API response format
-            localStorage.setItem('user', JSON.stringify(result.data.user));
-            console.log("User data:", JSON.stringify(result.data.user));
-            console.log("User avatar:", result.data.user.avatar);
+            // Use auth context login
+            login(result.data.user);
             
             setTimeout(() => {
               navigate('/dashboard'); // Redirect to dashboard after login
-            }, 2000);
+            }, 1000);
           } else {
             const errorMessage = result.message || "Login failed";
             handleError(errorMessage);

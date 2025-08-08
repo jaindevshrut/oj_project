@@ -1,23 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { handleSuccess, handleError } from '../utils';
 
-const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
+const UserDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-    const [user, setUser] = useState(null);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
-
-    // Get user data from localStorage
-    useEffect(() => {
-        if (isAuthenticated) {
-            const userData = localStorage.getItem('user');
-            if (userData) {
-                setUser(JSON.parse(userData));
-            }
-        }
-    }, [isAuthenticated]);
+    const { isAuthenticated, user, logout } = useAuth();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -40,7 +31,7 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
         setIsOpen(false);
         
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/logout`, {
+            const response = await fetch('/api/v1/users/logout', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -49,19 +40,15 @@ const UserDropdown = ({ isAuthenticated, setIsAuthenticated }) => {
             });
 
             if (response.ok) {
-                setIsAuthenticated(false);
-                localStorage.removeItem('user'); // Clear user data
+                logout(); // Use auth context logout
                 handleSuccess("Logout successful!");
-                
-                setTimeout(() => {
-                    navigate('/auth');
-                }, 1500);
             } else {
                 const result = await response.json();
                 handleError(result.message || "Logout failed");
             }
         } catch (error) {
             console.error("Error during logout:", error);
+            logout(); // Force logout on error
             handleError("Logout failed. Please try again.");
         } finally {
             setIsLoggingOut(false);

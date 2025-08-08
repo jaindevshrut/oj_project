@@ -1,10 +1,12 @@
 // filepath: d:\algo\oj_project\frontend\src\components\Header.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import UserDropdown from './UserDropdown';
 
-export default function Header({ isAuthenticated, setIsAuthenticated }) {
+export default function Header() {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50">
@@ -44,10 +46,7 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
                             Dashboard
                         </button>
                         {/* Add Code Editor link for authenticated users */}
-                        <UserDropdown 
-                            isAuthenticated={isAuthenticated} 
-                            setIsAuthenticated={setIsAuthenticated} 
-                        />
+                        <UserDropdown />
                     </div>
                 </div>
             </nav>
