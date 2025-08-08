@@ -9,11 +9,11 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const outputDir = path.join(__dirname, 'output');
-const codesDir = path.join(__dirname, 'codes');
+const outputDir = path.join(__dirname, './public/temp/output');
+const codesDir = path.join(__dirname, './public/temp/codes');
 
 
-const executeFile = async (filePath, inputFile) => {
+const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
     try {
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
@@ -69,40 +69,46 @@ const executeFile = async (filePath, inputFile) => {
             }
         }
 
-        // Execution step
+        // Execution step with time tracking
         try {
-            
+            const startTime = Date.now();
             const { stdout, stderr } = await execAsync(runCommand, { 
-                timeout: 10000 // 10 seconds timeout
+                timeout: timeLimit
             });
+            const executionTime = Date.now() - startTime;
 
             // Clean up temporary files
-            cleanupFiles(filePath, outputFilePath, extension);
+            cleanupFiles(filePath, outputFilePath, inputFile, extension);
 
             if (stderr && !stderr.includes('warning')) {
                 return {
                     success: false,
                     error: 'Runtime Error',
                     details: stderr,
-                    output: stdout || ''
+                    output: stdout || '',
+                    executionTime: executionTime
                 };
             }
 
             return {
                 success: true,
                 output: stdout || 'Program executed successfully (no output)',
-                error: null
+                error: null,
+                executionTime: executionTime
             };
 
         } catch (executionError) {
             // Clean up on error
-            cleanupFiles(filePath, outputFilePath, extension);
+            cleanupFiles(filePath, outputFilePath, inputFile, extension);
+            
+            const isTimeout = executionError.killed && executionError.signal === 'SIGTERM';
             
             return {
                 success: false,
-                error: 'Execution Failed',
+                error: isTimeout ? 'Time Limit Exceeded' : 'Execution Failed',
                 details: executionError.stderr || executionError.message,
-                timeout: executionError.killed && executionError.signal === 'SIGTERM'
+                timeout: isTimeout,
+                executionTime: isTimeout ? timeLimit : 0
             };
         }
 
@@ -116,14 +122,16 @@ const executeFile = async (filePath, inputFile) => {
     }
 };
 
-const cleanupFiles = (filePath, outputFilePath, extension) => {
+const cleanupFiles = (filePath, outputFilePath,inputFile, extension) => {
     try {
         
         // Remove source file
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
-        
+        if(fs.existsSync(inputFile)){
+            fs.unlinkSync(inputFile);
+        }
         // Remove compiled file
         if (fs.existsSync(outputFilePath)) {
             fs.unlinkSync(outputFilePath);

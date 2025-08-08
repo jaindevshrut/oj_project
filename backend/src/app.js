@@ -28,11 +28,13 @@ app.use(cookieParser()) // using for parsing the cookies
 import userRouter from './routes/user.routes.js'
 import healthcheckRouter from "./routes/healthcheck.routes.js"
 import problemRouter from "./routes/problem.routes.js"
+import submissionRouter from "./routes/submission.routes.js"
 
 // routes declaration
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/healthcheck", healthcheckRouter)
 app.use("/api/v1/problems", problemRouter)
+app.use("/api/v1/submissions", submissionRouter)
 
 app.use((err, req, res, next) => {
     console.error("Error caught by middleware:", err);

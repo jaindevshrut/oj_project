@@ -91,15 +91,6 @@ export default function AIFeatureModal({
         }
     };
 
-    const getButtonText = () => {
-        switch (feature) {
-            case 'Hint': return 'Get Hint';
-            case 'Feedback': return 'Get Feedback';
-            case 'Explain': return 'Explain Code';
-            case 'Complexity': return 'Analyze Complexity';
-            default: return 'Analyze';
-        }
-    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -124,9 +115,6 @@ export default function AIFeatureModal({
                     {/* Single Column - Just AI Result */}
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                AI Analysis Result
-                            </label>
                             <div className="border border-gray-300 rounded-lg p-6 min-h-[500px] bg-gray-50">
                                 {isLoading ? (
                                     <div className="flex flex-col items-center justify-center h-full py-20">

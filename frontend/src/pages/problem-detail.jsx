@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import AIReview from '../components/AIReview';
+import SubmissionHistory from '../components/SubmissionHistory';
 
 export default function ProblemDetail() {
     const { id } = useParams();
@@ -23,6 +24,9 @@ export default function ProblemDetail() {
     const [output, setOutput] = useState('');
     const [isRunning, setIsRunning] = useState(false);
     const [showAIReview, setShowAIReview] = useState(false);
+    
+    // View toggle state
+    const [showSubmissions, setShowSubmissions] = useState(false);
 
     // Language options
     const languageOptions = [
@@ -39,7 +43,7 @@ export default function ProblemDetail() {
             defaultCode: 'public class Main {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}' 
         },
         { 
-            value: 'py', 
+            value: 'python', 
             label: 'Python', 
             monacoLanguage: 'python',
             defaultCode: '# Your Python code here\n' 
@@ -94,14 +98,14 @@ export default function ProblemDetail() {
     // Fetch user's last submission for this problem
     useEffect(() => {
         if (problem) {
-            fetchLastSubmission();
+            checkSubmissionStatus();
         }
     }, [problem]);
 
     const fetchProblem = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/${id}`, {
+            const response = await fetch(`/api/v1/problems/${id}`, {
                 credentials: 'include'
             });
 
@@ -119,21 +123,25 @@ export default function ProblemDetail() {
         }
     };
 
-    const fetchLastSubmission = async () => {
+    const checkSubmissionStatus = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/submissions/last/${id}`, {
-                credentials: 'include'
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`/api/v1/submissions/problem/${id}?limit=1`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (response.ok) {
                 const data = await response.json();
-                if (data.data) {
-                    setVerdict(data.data.status);
+                if (data.success && data.data.submissions.length > 0) {
+                    const lastSubmission = data.data.submissions[0];
+                    setVerdict(lastSubmission.verdict);
                     setHasSubmitted(true);
                 }
             }
         } catch (err) {
-            console.error('Error fetching last submission:', err);
+            console.error('Error checking submission status:', err);
         }
     };
     const runCode = async () => {
@@ -146,7 +154,7 @@ export default function ProblemDetail() {
         setOutput('> Running code...');
         console.log(selectedLanguage);
         try {
-            const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/run`, {
+            const response = await fetch(`/api/v1/compiler/run`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -182,12 +190,13 @@ export default function ProblemDetail() {
         setSubmitResult(null);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/submissions`, {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`/api/v1/submissions/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                credentials: 'include',
                 body: JSON.stringify({
                     problemId: id,
                     language: selectedLanguage,
@@ -199,8 +208,11 @@ export default function ProblemDetail() {
 
             if (response.ok) {
                 setSubmitResult(result.data);
-                setVerdict(result.data.status);
+                setVerdict(result.data.verdict);
                 setHasSubmitted(true);
+                alert(`Submission completed! Verdict: ${result.data.verdict}`);
+                // Refresh submission status
+                checkSubmissionStatus();
             } else {
                 if (response.status === 401) {
                     navigate('/auth');
@@ -218,11 +230,13 @@ export default function ProblemDetail() {
     const getVerdictText = (verdict) => {
         switch (verdict) {
             case 'Accepted': return 'Accepted';
-            case 'WA': return 'Wrong Answer';
-            case 'TLE': return 'Time Limit Exceeded';
-            case 'MLE': return 'Memory Limit Exceeded';
-            case 'RE': return 'Runtime Error';
-            case 'CE': return 'Compilation Error';
+            case 'Wrong Answer': return 'Wrong Answer';
+            case 'Time Limit Exceeded': return 'Time Limit Exceeded';
+            case 'Memory Limit Exceeded': return 'Memory Limit Exceeded';
+            case 'Runtime Error': return 'Runtime Error';
+            case 'Compilation Error': return 'Compilation Error';
+            case 'Pending': return 'Pending';
+            case 'Judging': return 'Judging';
             default: return verdict || 'Unknown';
         }
     };
@@ -231,16 +245,19 @@ export default function ProblemDetail() {
         switch (verdict) {
             case 'Accepted':
                 return 'text-black bg-white border-2 border-black';
-            case 'WA':
+            case 'Wrong Answer':
                 return 'text-gray-800 bg-gray-200 border-2 border-gray-600';
-            case 'TLE':
+            case 'Time Limit Exceeded':
                 return 'text-gray-700 bg-gray-300 border-2 border-gray-500';
-            case 'MLE':
+            case 'Memory Limit Exceeded':
                 return 'text-black bg-gray-200 border-2 border-gray-300';
-            case 'RE':
+            case 'Runtime Error':
                 return 'text-gray-800 bg-gray-200 border-2 border-gray-600';
-            case 'CE':
+            case 'Compilation Error':
                 return 'text-gray-700 bg-gray-300 border-2 border-gray-500';
+            case 'Pending':
+            case 'Judging':
+                return 'text-blue-700 bg-blue-100 border-2 border-blue-300';
             default:
                 return 'text-gray-700 bg-gray-300 border-2 border-gray-500';
         }
@@ -345,88 +362,120 @@ export default function ProblemDetail() {
 
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Column - Problem Description */}
+                    {/* Left Column - Problem Description or Submissions */}
                     <div className="space-y-6">
-                        {/* Problem Header */}
-                        <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex-1">
-                                    <h1 className="text-3xl font-bold text-black mb-4">{problem.title}</h1>
-                                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                                        <span>Difficulty: 
-                                            <span className={`ml-2 px-3 py-1 rounded-full text-xs font-medium ${getDifficultyClass(problem.difficulty)}`}>
-                                                {problem.difficulty}
-                                            </span>
-                                        </span>
-                                        <span>Time Limit: {problem.timeLimit}ms</span>
-                                        <span>Memory Limit: {problem.memoryLimit}MB</span>
+                        {!showSubmissions ? (
+                            <>
+                                {/* Problem Header */}
+                                <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <h1 className="text-3xl font-bold text-black">{problem.title}</h1>
+                                                <button
+                                                    onClick={() => setShowSubmissions(true)}
+                                                    className="px-3 py-1.5 bg-white text-black border-2 border-black rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium flex items-center gap-2"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                    View Submissions
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                                                <span>Difficulty: 
+                                                    <span className={`ml-2 px-3 py-1 rounded-full text-xs font-medium ${getDifficultyClass(problem.difficulty)}`}>
+                                                        {problem.difficulty}
+                                                    </span>
+                                                </span>
+                                                <span>Time Limit: {problem.timeLimit}ms</span>
+                                                <span>Memory Limit: {problem.memoryLimit}MB</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Verdict Display */}
+                                        {hasSubmitted && verdict && (
+                                            <div className="ml-4">
+                                                <div className={`flex items-center px-3 py-2 rounded-lg ${getVerdictClass(verdict)}`}>
+                                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                                            d={verdict === 'Accepted' ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
+                                                    </svg>
+                                                    <span className="font-medium">{getVerdictText(verdict)}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Tags */}
+                                    {problem.tags && problem.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {problem.tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="px-3 py-1 bg-gray-200 rounded-full text-sm text-black border border-gray-300"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Problem Description */}
+                                <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
+                                    <h2 className="text-xl font-bold text-black mb-4">Problem Description</h2>
+                                    <div className="text-gray-700 prose prose-gray max-w-none">
+                                        <p className="whitespace-pre-wrap">{problem.description}</p>
                                     </div>
                                 </div>
 
-                                {/* Verdict Display */}
-                                {hasSubmitted && verdict && (
-                                    <div className="ml-4">
-                                        <div className={`flex items-center px-3 py-2 rounded-lg ${getVerdictClass(verdict)}`}>
-                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                                                    d={verdict === 'Accepted' ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"} />
-                                            </svg>
-                                            <span className="font-medium">{getVerdictText(verdict)}</span>
+                                {/* Sample Test Cases */}
+                                {problem.testcases && problem.testcases.filter(tc => tc.visible).length > 0 && (
+                                    <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
+                                        <h2 className="text-xl font-bold text-black mb-4">Sample Test Cases</h2>
+                                        <div className="space-y-4">
+                                            {problem.testcases.filter(tc => tc.visible).map((testCase, index) => (
+                                                <div key={index} className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
+                                                    <h3 className="text-lg font-semibold text-black mb-3">
+                                                        Sample {index + 1}
+                                                    </h3>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-black mb-2">Input:</h4>
+                                                            <pre className="bg-gray-100 p-3 rounded text-sm text-black overflow-x-auto border-2 border-gray-300">
+                                                                {testCase.input}
+                                                            </pre>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-black mb-2">Expected Output:</h4>
+                                                            <pre className="bg-gray-100 p-3 rounded text-sm text-black overflow-x-auto border-2 border-gray-300">
+                                                                {testCase.output}
+                                                            </pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
-                            </div>
-
-                            {/* Tags */}
-                            {problem.tags && problem.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    {problem.tags.map((tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="px-3 py-1 bg-gray-200 rounded-full text-sm text-black border border-gray-300"
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Problem Description */}
-                        <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
-                            <h2 className="text-xl font-bold text-black mb-4">Problem Description</h2>
-                            <div className="text-gray-700 prose prose-gray max-w-none">
-                                <p className="whitespace-pre-wrap">{problem.description}</p>
-                            </div>
-                        </div>
-
-                        {/* Sample Test Cases */}
-                        {problem.testcases && problem.testcases.filter(tc => tc.visible).length > 0 && (
+                            </>
+                        ) : (
+                            /* Submissions View */
                             <div className="bg-white rounded-lg p-6 border-2 border-black shadow-xl backdrop-blur-lg">
-                                <h2 className="text-xl font-bold text-black mb-4">Sample Test Cases</h2>
-                                <div className="space-y-4">
-                                    {problem.testcases.filter(tc => tc.visible).map((testCase, index) => (
-                                        <div key={index} className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-                                            <h3 className="text-lg font-semibold text-black mb-3">
-                                                Sample {index + 1}
-                                            </h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-black mb-2">Input:</h4>
-                                                    <pre className="bg-gray-100 p-3 rounded text-sm text-black overflow-x-auto border-2 border-gray-300">
-                                                        {testCase.input}
-                                                    </pre>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-black mb-2">Expected Output:</h4>
-                                                    <pre className="bg-gray-100 p-3 rounded text-sm text-black overflow-x-auto border-2 border-gray-300">
-                                                        {testCase.output}
-                                                    </pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-2xl font-bold text-black">Submissions</h2>
+                                    <button
+                                        onClick={() => setShowSubmissions(false)}
+                                        className="px-3 py-1.5 bg-white text-black border-2 border-black rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Back to Problem
+                                    </button>
                                 </div>
+                                <SubmissionHistory problemId={id} />
                             </div>
                         )}
                     </div>

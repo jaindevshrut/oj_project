@@ -29,6 +29,14 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
                         >
                             Problems
                         </button>
+                        {isAuthenticated && (
+                            <button 
+                                onClick={() => navigate('/submissions')}
+                                className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
+                            >
+                                Submissions
+                            </button>
+                        )}
                         <button 
                             onClick={() => navigate('/dashboard')}
                             className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
@@ -36,15 +44,6 @@ export default function Header({ isAuthenticated, setIsAuthenticated }) {
                             Dashboard
                         </button>
                         {/* Add Code Editor link for authenticated users */}
-                        {isAuthenticated && (
-                            <button 
-                                onClick={() => navigate('/code')}
-                                className="text-black hover:text-gray-600 transition-colors font-medium px-3 py-2 rounded-lg hover:bg-gray-100"
-                            >
-                                Code Editor
-                            </button>
-                        )}
-                        {/* Replace the logout button with UserDropdown */}
                         <UserDropdown 
                             isAuthenticated={isAuthenticated} 
                             setIsAuthenticated={setIsAuthenticated} 

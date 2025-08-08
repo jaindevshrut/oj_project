@@ -111,7 +111,7 @@ export default function Landing() {
         setOutput('');
     };
     const handleAIRequest = async () => {
-        if (!problemDescription.trim()) {
+        if (!problemDescription.trim() && selectedFeature!== 'Complexity') {
             alert('Please provide a problem description');
             return;
         }
@@ -331,7 +331,7 @@ export default function Landing() {
                                             </button>
                                             <button
                                                 onClick={() => handleAIFeature('Complexity')}
-                                                className="bg-orange-500 text-white hover:bg-orange-600 px-3 py-2 rounded-lg transition-colors text-sm"
+                                                className="bg-yellow-400 text-white hover:bg-yellow-500 px-3 py-2 rounded-lg transition-colors text-sm"
                                             >
                                                 Complexity
                                             </button>
@@ -481,7 +481,7 @@ export default function Landing() {
                                         {activeTab=== 'AI' && (
                                                <button
                                                     onClick={handleAIRequest}
-                                                    className={`mt-2 w-full py-2 rounded-lg hover:bg-blue-600 ${
+                                                    className={`mt-2 w-full py-2 rounded-lg hover:bg-black ${
                                                         selectedFeature === 'Hint'
                                                             ? 'bg-blue-500 text-white'
                                                             : selectedFeature === 'Feedback'
@@ -489,7 +489,7 @@ export default function Landing() {
                                                             : selectedFeature === 'Explain'
                                                             ? 'bg-purple-500 text-white'
                                                             : selectedFeature === 'Complexity'
-                                                            ? 'bg-orange-500 text-white'
+                                                            ? 'bg-yellow-500 text-white'
                                                             : 'bg-gray-300 text-gray-700'
 
                                                     }`}
@@ -537,25 +537,25 @@ export default function Landing() {
                                         </div>
                                         <div className="p-4 grid grid-cols-2 gap-2">
                                             <button
-                                                onClick={() => handleAIFeature('Hint')}
+                                                onClick={() => setShowLoginModal(true)}
                                                 className="px-3 py-2 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium border border-blue-300"
                                             >
                                                 Hint
                                             </button>
                                             <button
-                                                onClick={() => handleAIFeature('Feedback')}
+                                                onClick={() => setShowLoginModal(true)}
                                                 className="px-3 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium border border-green-300"
                                             >
                                                 Feedback
                                             </button>
                                             <button
-                                                onClick={() => handleAIFeature('Explain')}
+                                                onClick={() => setShowLoginModal(true)}
                                                 className="px-3 py-2 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium border border-purple-300"
                                             >
                                                 Explain
                                             </button>
                                             <button
-                                                onClick={() => handleAIFeature('Complexity')}
+                                                onClick={() => setShowLoginModal(true)}
                                                 className="px-3 py-2 bg-orange-100 text-orange-800 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium border border-orange-300"
                                             >
                                                 ⚡ Complexity

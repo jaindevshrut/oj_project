@@ -6,7 +6,7 @@ import createInputFile from "./src/createInputFile.js";
 import aiReview from "./src/aiReview.js";
 import aiFeatureRequest from "./src/aiFeatures.js";
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8001;
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -96,6 +96,151 @@ app.post("/run", async (req, res) => {
             success: false,
             error: "Internal Server Error",
             details: error.message
+        });
+    }
+});
+
+// New submission endpoint for judging against multiple test cases
+app.post("/submit", async (req, res) => {
+    try {
+        const { extension, code, testcases, timeLimit = 2000, memoryLimit = 256 } = req.body;
+        
+        // Validation
+        if (!extension || !code || !testcases || !Array.isArray(testcases)) {
+            return res.status(400).json({
+                success: false,
+                error: "Missing required fields",
+                details: "extension, code, and testcases array are required"
+            });
+        }
+
+        // Validate extension
+        const validExtensions = ['c', 'cpp', 'java', 'py'];
+        if (!validExtensions.includes(extension)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid file extension",
+                details: `Supported extensions: ${validExtensions.join(', ')}`
+            });
+        }
+
+        // Create file
+        console.log(`Creating file for submission with extension: ${extension}`);
+        const fileResult = createFile(extension, code);
+
+        if (!fileResult.success) {
+            return res.status(400).json({
+                success: false,
+                verdict: "Compilation Error",
+                error: "File creation failed",
+                details: fileResult.error,
+                testResults: []
+            });
+        }
+
+        console.log(`Running ${testcases.length} test cases...`);
+        const testResults = [];
+        let overallVerdict = "Accepted";
+        let passedTests = 0;
+        let failedOnTestCase = null;
+
+        // Run each test case
+        for (let i = 0; i < testcases.length; i++) {
+            const testcase = testcases[i];
+            console.log(`Running test case ${i + 1}/${testcases.length}`);
+
+            // Create input file for this test case
+            const inputFile = createInputFile(testcase.input);
+            if (!inputFile.success) {
+                testResults.push({
+                    testCase: i + 1,
+                    verdict: "Runtime Error",
+                    expectedOutput: testcase.output,
+                    actualOutput: "",
+                    executionTime: 0,
+                    error: "Input file creation failed"
+                });
+                overallVerdict = "Runtime Error";
+                failedOnTestCase = i + 1;
+                break;
+            }
+
+            // Execute with time limit
+            const executionResult = await executeFile(fileResult.filePath, inputFile.filePath, timeLimit);
+
+            if (!executionResult.success) {
+                let verdict = "Runtime Error";
+                if (executionResult.timeout) {
+                    verdict = "Time Limit Exceeded";
+                } else if (executionResult.error && executionResult.error.includes("memory")) {
+                    verdict = "Memory Limit Exceeded";
+                }
+
+                testResults.push({
+                    testCase: i + 1,
+                    verdict: verdict,
+                    expectedOutput: testcase.output,
+                    actualOutput: executionResult.output || "",
+                    executionTime: executionResult.executionTime || timeLimit,
+                    error: executionResult.error
+                });
+                overallVerdict = verdict;
+                failedOnTestCase = i + 1;
+                break;
+            } else {
+                // Compare output
+                const expectedOutput = testcase.output.trim();
+                const actualOutput = executionResult.output.trim();
+                
+                if (expectedOutput === actualOutput) {
+                    testResults.push({
+                        testCase: i + 1,
+                        verdict: "Accepted",
+                        expectedOutput: expectedOutput,
+                        actualOutput: actualOutput,
+                        executionTime: executionResult.executionTime || 0
+                    });
+                    passedTests++;
+                } else {
+                    testResults.push({
+                        testCase: i + 1,
+                        verdict: "Wrong Answer",
+                        expectedOutput: expectedOutput,
+                        actualOutput: actualOutput,
+                        executionTime: executionResult.executionTime || 0
+                    });
+                    overallVerdict = "Wrong Answer";
+                    failedOnTestCase = i + 1;
+                    break;
+                }
+            }
+        }
+
+        return res.status(200).json({
+            success: true,
+            verdict: overallVerdict,
+            passedTests: passedTests,
+            totalTests: testcases.length,
+            failedOnTestCase: failedOnTestCase,
+            testResults: testResults,
+            executionTime: testResults.length > 0 ? testResults[testResults.length - 1].executionTime : 0,
+            memoryUsed: 0, // Memory tracking not implemented yet
+            jobId: fileResult.jobId,
+            language: extension
+        });
+
+    } catch (error) {
+        console.error('Unexpected error in /submit:', error);
+        return res.status(500).json({
+            success: false,
+            verdict: "Runtime Error",
+            error: "Internal Server Error",
+            details: error.message,
+            testResults: [],
+            passedTests: 0,
+            totalTests: 0,
+            executionTime: 0,
+            memoryUsed: 0
         });
     }
 });

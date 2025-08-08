@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({
 const aiFeatureRequest = async (feature, code, language, problemDescription = '', constraints = '') => {
     try {
         let prompt = '';
-        
+
         switch (feature) {
             case 'Hint':
                 prompt = `As a programming mentor, provide helpful hints for solving this coding problem.

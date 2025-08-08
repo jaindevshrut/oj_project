@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
-const inputDir = path.join(__dirname, 'input');
+const inputDir = path.join(__dirname, './public/temp/input');
 
 
 const createInputFile = (content) => {
