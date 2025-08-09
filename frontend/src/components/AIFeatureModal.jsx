@@ -23,7 +23,7 @@ export default function AIFeatureModal({
 
     const handleSubmit = async () => {
         if (!problemDescription.trim()) {
-            alert('Please provide a problem description');
+            window.showToast && window.showToast('Please provide a problem description', 'warning');
             return;
         }
 

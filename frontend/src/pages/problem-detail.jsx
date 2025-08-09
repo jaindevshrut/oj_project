@@ -182,7 +182,7 @@ export default function ProblemDetail() {
 
     const submitCode = async () => {
         if (!code.trim()) {
-            alert('Please write some code first!');
+            window.showToast && window.showToast('Please write some code first!', 'warning');
             return;
         }
 
@@ -210,18 +210,32 @@ export default function ProblemDetail() {
                 setSubmitResult(result.data);
                 setVerdict(result.data.verdict);
                 setHasSubmitted(true);
-                alert(`Submission completed! Verdict: ${result.data.verdict}`);
+                
+                // Show success/failure toast based on verdict
+                const verdictType = result.data.verdict === 'Accepted' ? 'success' : 'error';
+                window.showToast && window.showToast(
+                    `Submission completed! Verdict: ${result.data.verdict}`, 
+                    verdictType, 
+                    5000
+                );
+                
                 // Refresh submission status
                 checkSubmissionStatus();
             } else {
                 if (response.status === 401) {
                     navigate('/auth');
                 } else {
-                    alert(result.message || 'Submission failed');
+                    window.showToast && window.showToast(
+                        result.message || 'Submission failed', 
+                        'error'
+                    );
                 }
             }
         } catch (error) {
-            alert('Error submitting solution: ' + error.message);
+            window.showToast && window.showToast(
+                'Error submitting solution: ' + error.message, 
+                'error'
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -505,16 +519,31 @@ export default function ProblemDetail() {
                                         <button
                                             onClick={runCode}
                                             disabled={isRunning}
-                                            className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center gap-1 border-2 border-gray-300"
+                                            className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 px-3 py-1.5 rounded-lg transition-all duration-300 text-sm flex items-center gap-2 border-2 border-gray-300 group"
                                         >
                                             {isRunning ? (
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                    <span>Running...</span>
+                                                </>
                                             ) : (
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1M9 16h1m4 0h1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                                <>
+                                                    <svg 
+                                                        className="w-4 h-4 transform group-hover:scale-110 transition-transform duration-200" 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path 
+                                                            strokeLinecap="round" 
+                                                            strokeLinejoin="round" 
+                                                            strokeWidth="2" 
+                                                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1M9 16h1m4 0h1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                                        />
+                                                    </svg>
+                                                    <span>Run</span>
+                                                </>
                                             )}
-                                            {isRunning ? 'Running...' : 'Run'}
                                         </button>
                                         <button
                                             onClick={() => {
@@ -522,25 +551,50 @@ export default function ProblemDetail() {
                                                 setOutput('');
                                                 setCustomInput('');
                                             }}
-                                            className="bg-white text-black hover:bg-gray-100 border-2 border-black px-3 py-1.5 rounded-lg transition-colors text-sm flex items-center gap-1"
+                                            className="bg-white text-black hover:bg-gray-100 border-2 border-black px-3 py-1.5 rounded-lg transition-all duration-300 text-sm flex items-center gap-2 group"
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            <svg 
+                                                className="w-4 h-4 transform group-hover:rotate-12 transition-transform duration-200" 
+                                                fill="none" 
+                                                stroke="currentColor" 
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round" 
+                                                    strokeWidth="2" 
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" 
+                                                />
                                             </svg>
-                                            Clear
+                                            <span>Clear</span>
                                         </button>
                                         <button
                                 onClick={submitCode}
                                 disabled={isSubmitting}
-                                className="w-full px-3 py-1.5 bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white border-2 border-gray-300 rounded-lg transition-colors font-medium text-sm"
+                                className="w-full px-3 py-1.5 bg-black hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white border-2 border-gray-300 rounded-lg transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 group"
                             >
                                 {isSubmitting ? (
-                                    <div className="flex items-center justify-center">
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                                        Submitting...
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>Submitting...</span>
                                     </div>
                                 ) : (
-                                    'Submit'
+                                    <>
+                                        <svg 
+                                            className="w-4 h-4 transform group-hover:scale-110 transition-transform duration-200" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth="2" 
+                                                d="M13 10V3L4 14h7v7l9-11h-7z" 
+                                            />
+                                        </svg>
+                                        <span>Submit</span>
+                                    </>
                                 )}
                             </button>
                                         <button

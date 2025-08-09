@@ -22,13 +22,13 @@ const ProfileAvatar = ({
         if (file) {
             // Validate file type
             if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
+                window.showToast && window.showToast('Please select an image file', 'warning');
                 return;
             }
             
             // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert('File size must be less than 5MB');
+                window.showToast && window.showToast('File size must be less than 5MB', 'warning');
                 return;
             }
 

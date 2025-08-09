@@ -16,6 +16,7 @@ import { Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import RouteWrapper from './components/RouteWrapper.jsx';
+import { ToastProvider } from './components/Toast.jsx';
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -94,7 +95,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </AuthProvider>
   );
 }

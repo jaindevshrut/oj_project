@@ -112,17 +112,17 @@ export default function Landing() {
     };
     const handleAIRequest = async () => {
         if (!problemDescription.trim() && selectedFeature!== 'Complexity') {
-            alert('Please provide a problem description');
+            window.showToast && window.showToast('Please provide a problem description', 'warning');
             return;
         }
 
         if (!selectedFeature) {
-            alert('Please select an AI feature first');
+            window.showToast && window.showToast('Please select an AI feature first', 'warning');
             return;
         }
 
         if (!code.trim()) {
-            alert('Please write some code before requesting AI analysis');
+            window.showToast && window.showToast('Please write some code before requesting AI analysis', 'warning');
             return;
         }
 

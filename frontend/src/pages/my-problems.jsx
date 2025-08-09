@@ -24,7 +24,7 @@ const MyProblems = () => {
                 setProblems(data.data.problems);
                 setPagination(data.data.pagination);
             } else if (response.status === 403) {
-                alert('Access denied. Only Problemsetters and Admins can view this page.');
+                window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can view this page.', 'error');
                 navigate('/dashboard');
             } else {
                 console.error('Failed to fetch problems');
@@ -48,15 +48,15 @@ const MyProblems = () => {
             });
 
             if (response.ok) {
-                alert('Problem deleted successfully');
+                window.showToast && window.showToast('Problem deleted successfully', 'success');
                 fetchMyProblems(); // Refresh the list
             } else {
                 const data = await response.json();
-                alert(data.message || 'Failed to delete problem');
+                window.showToast && window.showToast(data.message || 'Failed to delete problem', 'error');
             }
         } catch (error) {
             console.error('Error deleting problem:', error);
-            alert('Failed to delete problem');
+            window.showToast && window.showToast('Failed to delete problem', 'error');
         }
     };
 

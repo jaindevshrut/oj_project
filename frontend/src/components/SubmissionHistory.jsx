@@ -86,17 +86,6 @@ const SubmissionHistory = ({ problemId = null }) => {
         }
     };
 
-    const getVerdictIcon = (verdict) => {
-        switch (verdict) {
-            case 'Accepted': return '✅';
-            case 'Wrong Answer': return '❌';
-            case 'Time Limit Exceeded': return '⏱️';
-            case 'Memory Limit Exceeded': return '💾';
-            case 'Runtime Error': return '💥';
-            case 'Compilation Error': return '🔧';
-            default: return '⏳';
-        }
-    };
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString();
@@ -212,9 +201,6 @@ const SubmissionHistory = ({ problemId = null }) => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-lg">
-                                                    {getVerdictIcon(submission.verdict)}
-                                                </span>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getVerdictColor(submission.verdict)}`}>
                                                     {submission.verdict}
                                                 </span>
@@ -325,7 +311,6 @@ const SubmissionHistory = ({ problemId = null }) => {
                                 Verdict
                             </h4>
                             <div className="flex items-center gap-2">
-                                <span>{getVerdictIcon(selectedSubmission.verdict)}</span>
                                 <span className={`font-semibold px-2 py-1 rounded text-sm ${getVerdictColor(selectedSubmission.verdict)}`}>
                                     {selectedSubmission.verdict}
                                 </span>
@@ -361,30 +346,42 @@ const SubmissionHistory = ({ problemId = null }) => {
                             <h4 className="font-medium text-black mb-3">
                                 Test Case Results
                             </h4>
-                            <div className="space-y-3">
-                                {selectedSubmission.testCaseResults.map((testCase, index) => (
+                            
+                            {/* Visible Test Cases - Full Details */}
+                            <div className="space-y-3 mb-4">
+                                {selectedSubmission.testCaseResults
+                                    .filter(testCase => testCase.visible)
+                                    .map((testCase, index) => (
                                     <div 
-                                        key={index}
+                                        key={`visible-${index}`}
                                         className={`border-2 rounded-lg p-4 ${
-                                            testCase.passed 
+                                            testCase.verdict === 'Accepted'
                                                 ? 'border-green-200 bg-green-50' 
                                                 : 'border-red-200 bg-red-50'
                                         }`}
                                     >
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="font-medium">
-                                                Test Case {index + 1}
+                                                Test Case {testCase.testCase || (index + 1)}
                                             </span>
                                             <span className={`text-sm font-medium ${
-                                                testCase.passed 
+                                                testCase.verdict === 'Accepted'
                                                     ? 'text-green-600' 
                                                     : 'text-red-600'
                                             }`}>
-                                                {testCase.passed ? '✅ Passed' : '❌ Failed'}
+                                                {testCase.verdict === 'Accepted' ? 'Passed' : `${testCase.verdict}`}
                                             </span>
                                         </div>
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p className="font-medium text-gray-700 mb-1">
+                                                    Input:
+                                                </p>
+                                                <pre className="bg-white p-2 rounded border-2 border-gray-200 font-mono text-xs">
+                                                    {testCase.input || 'No input'}
+                                                </pre>
+                                            </div>
                                             <div>
                                                 <p className="font-medium text-gray-700 mb-1">
                                                     Expected Output:
@@ -393,7 +390,7 @@ const SubmissionHistory = ({ problemId = null }) => {
                                                     {testCase.expectedOutput}
                                                 </pre>
                                             </div>
-                                            <div>
+                                            <div className="md:col-span-2">
                                                 <p className="font-medium text-gray-700 mb-1">
                                                     Your Output:
                                                 </p>
@@ -402,9 +399,70 @@ const SubmissionHistory = ({ problemId = null }) => {
                                                 </pre>
                                             </div>
                                         </div>
+                                        
+                                        {testCase.executionTime && (
+                                            <div className="mt-2 text-sm text-gray-600">
+                                                <span className="font-medium">Execution Time:</span> {testCase.executionTime}ms
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Hidden Test Cases - Capsule Format */}
+                            {selectedSubmission.testCaseResults.filter(testCase => !testCase.visible).length > 0 && (
+                                <div>
+                                    <h5 className="font-medium text-gray-700 mb-2 text-sm">
+                                        Hidden Test Cases:
+                                    </h5>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedSubmission.testCaseResults
+                                            .filter(testCase => !testCase.visible)
+                                            .map((testCase, index) => {
+                                                const isAccepted = testCase.verdict === 'Accepted';
+                                                const tooltipContent = isAccepted 
+                                                    ? `Test Case ${testCase.testCase}: Passed (${testCase.executionTime || 0}ms)`
+                                                    : `Test Case ${testCase.testCase}: ${testCase.verdict}${testCase.error ? ` - ${testCase.error}` : ''}${testCase.executionTime ? ` (${testCase.executionTime}ms)` : ''}`;
+                                                
+                                                return (
+                                                    <div
+                                                        key={`hidden-${index}`}
+                                                        className={`group relative inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default transition-all hover:scale-105 ${
+                                                            isAccepted
+                                                                ? 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+                                                                : 'bg-red-100 text-red-800 border border-red-300 hover:bg-red-200'
+                                                        }`}
+                                                    >
+                                                        <span className={`w-2 h-2 rounded-full mr-2 ${
+                                                            isAccepted ? 'bg-green-500' : 'bg-red-500'
+                                                        }`}></span>
+                                                        TC {testCase.testCase}
+                                                        
+                                                        {/* Hover tooltip */}
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap z-10 max-w-xs">
+                                                            {tooltipContent}
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                    
+                                    {/* Summary */}
+                                    <div className="mt-3 text-sm text-gray-600">
+                                        <span className="font-medium">
+                                            Hidden Cases: 
+                                        </span>
+                                        <span className="text-green-600 ml-1">
+                                            {selectedSubmission.testCaseResults.filter(tc => !tc.visible && tc.verdict === 'Accepted').length} passed
+                                        </span>
+                                        <span className="mx-1">•</span>
+                                        <span className="text-red-600">
+                                            {selectedSubmission.testCaseResults.filter(tc => !tc.visible && tc.verdict !== 'Accepted').length} failed
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

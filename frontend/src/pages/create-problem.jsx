@@ -24,7 +24,7 @@ const CreateProblem = () => {
             setUserAccType(userData.accType);
             
             if (userData.accType !== 'Problemsetter' && userData.accType !== 'Admin') {
-                alert('Access denied. Only Problemsetters and Admins can create problems.');
+                window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can create problems.', 'error');
                 navigate('/dashboard');
             }
         } else {
@@ -79,12 +79,12 @@ const CreateProblem = () => {
         e.preventDefault();
         
         if (!formData.title.trim() || !formData.description.trim()) {
-            alert('Please fill in all required fields.');
+            window.showToast && window.showToast('Please fill in all required fields.', 'warning');
             return;
         }
 
         if (formData.testcases.some(tc => !tc.input.trim() || !tc.output.trim())) {
-            alert('Please fill in all test cases.');
+            window.showToast && window.showToast('Please fill in all test cases.', 'warning');
             return;
         }
 
@@ -102,15 +102,15 @@ const CreateProblem = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                alert('Problem created successfully!');
+                window.showToast && window.showToast('Problem created successfully!', 'success');
                 navigate('/my-problems');
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || 'Failed to create problem');
+                window.showToast && window.showToast(errorData.message || 'Failed to create problem', 'error');
             }
         } catch (error) {
             console.error('Error creating problem:', error);
-            alert('Failed to create problem');
+            window.showToast && window.showToast('Failed to create problem', 'error');
         } finally {
             setLoading(false);
         }

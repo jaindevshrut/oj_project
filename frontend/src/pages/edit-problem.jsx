@@ -110,12 +110,12 @@ const EditProblem = () => {
         e.preventDefault();
         
         if (!formData.title || !formData.description || testcases.length === 0) {
-            alert('Please fill in all required fields and add at least one test case.');
+            window.showToast && window.showToast('Please fill in all required fields and add at least one test case.', 'warning');
             return;
         }
 
         if (testcases.some(tc => !tc.input.trim() || !tc.output.trim())) {
-            alert('Please fill in all test case inputs and outputs.');
+            window.showToast && window.showToast('Please fill in all test case inputs and outputs.', 'warning');
             return;
         }
 
@@ -135,15 +135,15 @@ const EditProblem = () => {
             });
 
             if (response.ok) {
-                alert('Problem updated successfully!');
+                window.showToast && window.showToast('Problem updated successfully!', 'success');
                 navigate('/my-problems');
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || 'Failed to update problem');
+                window.showToast && window.showToast(errorData.message || 'Failed to update problem', 'error');
             }
         } catch (error) {
             console.error('Error updating problem:', error);
-            alert('Failed to update problem');
+            window.showToast && window.showToast('Failed to update problem', 'error');
         } finally {
             setSaving(false);
         }

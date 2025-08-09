@@ -36,7 +36,10 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                 runCommand = `"${outputFilePath}" < "${inputFile}"`;
                 break;
             case '.java':
-                runCommand = `java ${filePath} < "${inputFile}"`;
+                const className = path.basename(filePath, '.java');
+                const javaDir = path.dirname(filePath);
+                compileCommand = `javac "${filePath}"`;
+                runCommand = `cd "${javaDir}" && java ${className} < "${inputFile}"`;
                 break;
             case '.py':
                 runCommand = `python "${filePath}" < "${inputFile}"`;
@@ -77,8 +80,8 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
             });
             const executionTime = Date.now() - startTime;
 
-            // Clean up temporary files
-            cleanupFiles(filePath, outputFilePath, inputFile, extension);
+            // Clean up only input file and executable (not source file)
+            cleanupFiles(null, outputFilePath, inputFile, extension, false);
 
             if (stderr && !stderr.includes('warning')) {
                 return {
@@ -86,20 +89,22 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                     error: 'Runtime Error',
                     details: stderr,
                     output: stdout || '',
-                    executionTime: executionTime
+                    executionTime: executionTime,
+                    filePath: filePath // Return file path for later cleanup
                 };
             }
 
             return {
                 success: true,
-                output: stdout || 'Program executed successfully (no output)',
+                output: stdout || '',
                 error: null,
-                executionTime: executionTime
+                executionTime: executionTime,
+                filePath: filePath // Return file path for later cleanup
             };
 
         } catch (executionError) {
-            // Clean up on error
-            cleanupFiles(filePath, outputFilePath, inputFile, extension);
+            // Clean up on error (only input file and executable, not source file)
+            cleanupFiles(null, outputFilePath, inputFile, extension, false);
             
             const isTimeout = executionError.killed && executionError.signal === 'SIGTERM';
             
@@ -108,7 +113,8 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                 error: isTimeout ? 'Time Limit Exceeded' : 'Execution Failed',
                 details: executionError.stderr || executionError.message,
                 timeout: isTimeout,
-                executionTime: isTimeout ? timeLimit : 0
+                executionTime: isTimeout ? timeLimit : 0,
+                filePath: filePath // Return file path for later cleanup
             };
         }
 
@@ -122,23 +128,26 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
     }
 };
 
-const cleanupFiles = (filePath, outputFilePath,inputFile, extension) => {
+const cleanupFiles = (filePath, outputFilePath, inputFile, extension, cleanupSource = true) => {
     try {
         
-        // Remove source file
-        if (fs.existsSync(filePath)) {
+        // Remove source file only if requested
+        if (cleanupSource && filePath && fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
-        if(fs.existsSync(inputFile)){
+        
+        // Always remove input file
+        if(inputFile && fs.existsSync(inputFile)){
             fs.unlinkSync(inputFile);
         }
+        
         // Remove compiled file
-        if (fs.existsSync(outputFilePath)) {
+        if (outputFilePath && fs.existsSync(outputFilePath)) {
             fs.unlinkSync(outputFilePath);
         }
         
         // Remove .class file for Java
-        if (extension === '.java') {
+        if (extension === '.java' && filePath) {
             const classFile = filePath.replace('.java', '.class');
             if (fs.existsSync(classFile)) {
                 fs.unlinkSync(classFile);
@@ -149,4 +158,24 @@ const cleanupFiles = (filePath, outputFilePath,inputFile, extension) => {
     }
 };
 
+// Function to cleanup source files after all test cases are done
+const cleanupSourceFile = (filePath, extension) => {
+    try {
+        if (filePath && fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        // Remove .class file for Java
+        if (extension === '.java' && filePath) {
+            const classFile = filePath.replace('.java', '.class');
+            if (fs.existsSync(classFile)) {
+                fs.unlinkSync(classFile);
+            }
+        }
+    } catch (cleanupError) {
+        console.error('Error during source file cleanup:', cleanupError);
+    }
+};
+
 export default executeFile;
+export { cleanupSourceFile };

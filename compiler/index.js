@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import executeFile from "./src/executeFile.js";
+import executeFile, { cleanupSourceFile } from "./src/executeFile.js";
 import createFile from "./src/createFile.js";
 import createInputFile from "./src/createInputFile.js";
 import aiReview from "./src/aiReview.js";
@@ -102,6 +102,7 @@ app.post("/run", async (req, res) => {
 
 // New submission endpoint for judging against multiple test cases
 app.post("/submit", async (req, res) => {
+    let fileResult = null; // Declare at top level for cleanup
     try {
         const { extension, code, testcases, timeLimit = 2000, memoryLimit = 256 } = req.body;
         
@@ -126,7 +127,7 @@ app.post("/submit", async (req, res) => {
 
         // Create file
         console.log(`Creating file for submission with extension: ${extension}`);
-        const fileResult = createFile(extension, code);
+        fileResult = createFile(extension, code);
 
         if (!fileResult.success) {
             return res.status(400).json({
@@ -147,6 +148,7 @@ app.post("/submit", async (req, res) => {
         // Run each test case
         for (let i = 0; i < testcases.length; i++) {
             const testcase = testcases[i];
+            console.log(testcase.input);
             console.log(`Running test case ${i + 1}/${testcases.length}`);
 
             // Create input file for this test case
@@ -155,14 +157,18 @@ app.post("/submit", async (req, res) => {
                 testResults.push({
                     testCase: i + 1,
                     verdict: "Runtime Error",
-                    expectedOutput: testcase.output,
+                    input: testcase.visible ? testcase.input : null,
+                    expectedOutput: testcase.visible ? testcase.output : null,
                     actualOutput: "",
                     executionTime: 0,
-                    error: "Input file creation failed"
+                    error: "Input file creation failed",
+                    visible: testcase.visible || false
                 });
-                overallVerdict = "Runtime Error";
-                failedOnTestCase = i + 1;
-                break;
+                if (overallVerdict === "Accepted") {
+                    overallVerdict = "Runtime Error";
+                    failedOnTestCase = i + 1;
+                }
+                continue; // Continue to next test case instead of breaking
             }
 
             // Execute with time limit
@@ -179,42 +185,54 @@ app.post("/submit", async (req, res) => {
                 testResults.push({
                     testCase: i + 1,
                     verdict: verdict,
-                    expectedOutput: testcase.output,
+                    input: testcase.visible ? testcase.input : null,
+                    expectedOutput: testcase.visible ? testcase.output : null,
                     actualOutput: executionResult.output || "",
                     executionTime: executionResult.executionTime || timeLimit,
-                    error: executionResult.error
+                    error: executionResult.error,
+                    visible: testcase.visible || false
                 });
-                overallVerdict = verdict;
-                failedOnTestCase = i + 1;
-                break;
+                if (overallVerdict === "Accepted") {
+                    overallVerdict = verdict;
+                    failedOnTestCase = i + 1;
+                }
+                continue; // Continue to next test case instead of breaking
             } else {
                 // Compare output
                 const expectedOutput = testcase.output.trim();
                 const actualOutput = executionResult.output.trim();
-                
+                console.log(`Expected: ${expectedOutput}, Actual: ${actualOutput}`);
                 if (expectedOutput === actualOutput) {
                     testResults.push({
                         testCase: i + 1,
                         verdict: "Accepted",
-                        expectedOutput: expectedOutput,
-                        actualOutput: actualOutput,
-                        executionTime: executionResult.executionTime || 0
+                        input: testcase.visible ? testcase.input : null,
+                        expectedOutput: testcase.visible ? expectedOutput : null,
+                        actualOutput: testcase.visible ? actualOutput : null,
+                        executionTime: executionResult.executionTime || 0,
+                        visible: testcase.visible || false
                     });
                     passedTests++;
                 } else {
                     testResults.push({
                         testCase: i + 1,
                         verdict: "Wrong Answer",
-                        expectedOutput: expectedOutput,
-                        actualOutput: actualOutput,
-                        executionTime: executionResult.executionTime || 0
+                        input: testcase.visible ? testcase.input : null,
+                        expectedOutput: testcase.visible ? expectedOutput : null,
+                        actualOutput: testcase.visible ? actualOutput : null,
+                        executionTime: executionResult.executionTime || 0,
+                        visible: testcase.visible || false
                     });
-                    overallVerdict = "Wrong Answer";
-                    failedOnTestCase = i + 1;
-                    break;
+                    if (overallVerdict === "Accepted") {
+                        overallVerdict = "Wrong Answer";
+                        failedOnTestCase = i + 1;
+                    }
                 }
             }
         }
+
+        // Clean up source file after all test cases are done
+        cleanupSourceFile(fileResult.filePath, extension);
 
         return res.status(200).json({
             success: true,
@@ -225,12 +243,15 @@ app.post("/submit", async (req, res) => {
             testResults: testResults,
             executionTime: testResults.length > 0 ? testResults[testResults.length - 1].executionTime : 0,
             memoryUsed: 0, // Memory tracking not implemented yet
-            jobId: fileResult.jobId,
             language: extension
         });
 
     } catch (error) {
         console.error('Unexpected error in /submit:', error);
+        // Clean up source file on error if it exists
+        if (fileResult && fileResult.filePath) {
+            cleanupSourceFile(fileResult.filePath, extension);
+        }
         return res.status(500).json({
             success: false,
             verdict: "Runtime Error",

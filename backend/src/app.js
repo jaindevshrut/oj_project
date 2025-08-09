@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import rateLimit from "express-rate-limit"
 import path from "path"
 import { fileURLToPath } from 'url';
 
@@ -8,11 +9,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express() // instead of this use cors
-
+app.use(rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60 // max requests per IP per minute
+}));
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true, // Allow cookies to be sent with requests
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
+    methods: ["GET", "POST", "PUT", "DELETE"], 
     allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
     
 })) // using for defining the origin of the request
@@ -23,6 +27,16 @@ app.use(express.static("public")) // using for serving the static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cookieParser()) // using for parsing the cookies
 
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "";
+  const referer = req.headers.referer || "";
+  
+  if (origin.startsWith(process.env.CORS_ORIGIN) || 
+      referer.startsWith(process.env.CORS_ORIGIN)) {
+    return next();
+  }
+  res.status(403).json({ error: "Forbidden" });
+});
 
 // Routes import
 import userRouter from './routes/user.routes.js'

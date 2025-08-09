@@ -77,12 +77,17 @@ const submissionSchema = new mongoose.Schema({
         default: null
     },
     testCaseResults: [{
+        testCase: Number,
+        verdict: String,
         input: String,
         expectedOutput: String,
         actualOutput: String,
-        passed: Boolean,
         executionTime: Number,
-        errorMessage: String
+        error: String,
+        visible: {
+            type: Boolean,
+            default: false
+        }
     }]
 }, { timestamps: true })
 
