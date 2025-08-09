@@ -74,7 +74,7 @@ export default function Register({ onToggleForm }) {
       
       <form onSubmit={handleSubmit}>
         <InputField 
-          icon={<UserIcon />} 
+          icon={UserIcon} 
           type="text" 
           name="fullName" 
           placeholder="Full Name" 
@@ -82,14 +82,14 @@ export default function Register({ onToggleForm }) {
           autoFocus={true} 
         />
         <InputField 
-          icon={<UserIcon />} 
+          icon={UserIcon} 
           type="text" 
           name="username" 
           placeholder="Username" 
           onChange={handleChange} 
         />
         <InputField 
-          icon={<MailIcon />} 
+          icon={MailIcon} 
           type="email" 
           name="email" 
           placeholder="Email" 
@@ -97,7 +97,7 @@ export default function Register({ onToggleForm }) {
         />
         {/* Added isPassword prop to enable the visibility toggle */}
         <InputField 
-          icon={<LockIcon />} 
+          icon={LockIcon} 
           type="password" 
           name="password" 
           placeholder="Password" 

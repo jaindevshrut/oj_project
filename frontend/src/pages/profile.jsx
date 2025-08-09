@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProfileAvatar from '../components/ProfileAvatar';
 import ProfileStats from '../components/ProfileStats';
+import CodingActivity from '../components/CodingActivity';
 import { handleError, handleSuccess } from '../utils';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
+    const [submissions, setSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchUserProfile();
+        fetchUserSubmissions();
     }, []);
 
     const fetchUserProfile = async () => {
@@ -25,7 +28,7 @@ const Profile = () => {
             }
 
             // Then fetch fresh data from backend
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/profile`, {
+            const response = await fetch('/api/v1/users/profile', {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -46,6 +49,27 @@ const Profile = () => {
             handleError('Failed to load profile data');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchUserSubmissions = async () => {
+        try {
+            const response = await fetch('/api/v1/submissions?limit=365', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data) {
+                    setSubmissions(result.data.submissions || []);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user submissions:', error);
         }
     };
 
@@ -181,6 +205,11 @@ const Profile = () => {
                         <h2 className="text-2xl font-bold text-black mb-6 border-b-2 border-gray-200 pb-2">Statistics</h2>
                         <ProfileStats userId={user._id} />
                     </div>
+                </div>
+
+                {/* Coding Activity Section */}
+                <div className="mb-8">
+                    <CodingActivity submissions={submissions} />
                 </div>
 
                 {/* Account Information */}

@@ -62,7 +62,7 @@ export default function Login({ onToggleForm }) {
       
       <form onSubmit={handleSubmit}>
         <InputField 
-          icon={<UserIcon />} 
+          icon={UserIcon} 
           type="text" 
           name="email" 
           placeholder="Username or Email" 
@@ -70,7 +70,7 @@ export default function Login({ onToggleForm }) {
           autoFocus={true} 
         />
         <InputField 
-          icon={<LockIcon />} 
+          icon={LockIcon} 
           type="password" 
           name="password" 
           placeholder="Password" 
