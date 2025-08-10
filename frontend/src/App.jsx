@@ -24,7 +24,7 @@ function AppContent() {
   return (
     <div className='App'>
       <Header />
-      <div className="pt-2"> {/* Add top padding to prevent header overlap */}
+      <div className="pt-20"> {/* Add top padding to prevent header overlap */}
         <Routes>
           <Route 
             path='/' 
