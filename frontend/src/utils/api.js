@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Utility function to make API calls with proper error handling
 export const apiCall = async (endpoint, options = {}) => {

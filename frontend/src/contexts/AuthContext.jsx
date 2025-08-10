@@ -25,6 +25,10 @@ export const AuthProvider = ({ children }) => {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/me`, {
                 method: 'GET',
                 credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
             });
                   
             const result = await response.json();
@@ -32,7 +36,7 @@ export const AuthProvider = ({ children }) => {
             if (response.ok && result.success && result.data) {
                 setIsAuthenticated(true);
                 setUser(result.data);
-                localStorage.setItem('user', JSON.stringify(result.data));
+                // Remove localStorage usage for user data - rely only on cookies
                 
                 // Only redirect to dashboard if user is on auth page
                 if (location.pathname === '/auth') {
@@ -41,7 +45,7 @@ export const AuthProvider = ({ children }) => {
             } else {
                 setIsAuthenticated(false);
                 setUser(null);
-                localStorage.removeItem('user');
+                // Remove localStorage cleanup since we're not using it
                 
                 // Redirect to auth if trying to access protected routes
                 const protectedRoutes = ['/dashboard', '/profile', '/edit-profile', '/problems', '/problem', '/create-problem', '/edit-problem', '/my-problems', '/submissions'];
@@ -57,7 +61,7 @@ export const AuthProvider = ({ children }) => {
             console.error("Error checking authentication:", error);
             setIsAuthenticated(false);
             setUser(null);
-            localStorage.removeItem('user');
+            // Remove localStorage cleanup since we're not using it
         } finally {
             // Add minimum loading time for smooth transition
             setTimeout(() => {
@@ -69,15 +73,24 @@ export const AuthProvider = ({ children }) => {
     const login = (userData) => {
         setIsAuthenticated(true);
         setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        // Remove localStorage usage - rely only on cookies
     };
 
-    const logout = () => {
-        setIsAuthenticated(false);
-        setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        navigate('/auth', { replace: true });
+    const logout = async () => {
+        try {
+            // Call backend logout to clear cookies
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error("Error during logout:", error);
+        } finally {
+            setIsAuthenticated(false);
+            setUser(null);
+            // Remove localStorage cleanup since we're not using it
+            navigate('/auth', { replace: true });
+        }
     };
 
     useEffect(() => {

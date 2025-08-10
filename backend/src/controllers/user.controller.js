@@ -80,8 +80,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
     const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax', // Add sameSite policy
+        secure: process.env.NODE_ENV === 'production', // Only secure in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
         maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     }
 
@@ -110,8 +110,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
     )
     const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'lax'
+        secure: process.env.NODE_ENV === 'production', // Only secure in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-origin in production
     }
     return res.status(200)
         .clearCookie("accessToken", cookieOptions)

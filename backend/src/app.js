@@ -14,14 +14,31 @@ app.use(rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 60 // max requests per IP per minute
 }));
+
+// Health check route (before other middleware)
 app.use("/api/v1/healthcheck", healthcheckRouter)
-app.use(cors({
-  origin: process.env.CORS_ORIGIN,
+
+// CORS Configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.CORS_ORIGIN.split(',').map(origin => origin.trim());
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true, // Allow cookies to be sent with requests
-  methods: ["GET", "POST", "PUT", "DELETE"], 
-  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
-  
-})) // using for defining the origin of the request
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  exposedHeaders: ["Set-Cookie"]
+};
+
+app.use(cors(corsOptions)) // using for defining the origin of the request
 app.use(express.json({limit: "16kb"})) // using for parsing the json data
 app.use(express.urlencoded({extended: true})) // using for parsing the form data (isse ham vo %20 ya + wali cheeze jo url me hoti h usse configure kr skte h) 
 app.use(express.static("public")) // using for serving the static files
@@ -29,16 +46,17 @@ app.use(express.static("public")) // using for serving the static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cookieParser()) // using for parsing the cookies
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin || "";
-  const referer = req.headers.referer || "";
-  
-  if (origin.startsWith(process.env.CORS_ORIGIN) || 
-      referer.startsWith(process.env.CORS_ORIGIN)) {
-    return next();
-  }
-  res.status(403).json({ error: "Forbidden" });
-});
+// Remove the custom origin check middleware as CORS handles this
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin || "";
+//   const referer = req.headers.referer || "";
+//   
+//   if (origin.startsWith(process.env.CORS_ORIGIN) || 
+//       referer.startsWith(process.env.CORS_ORIGIN)) {
+//     return next();
+//   }
+//   res.status(403).json({ error: "Forbidden" });
+// });
 
 // Routes import
 import userRouter from './routes/user.routes.js'
