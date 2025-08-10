@@ -15,7 +15,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/v1\/compiler/, ''),
       },
       '/api/v1': {
-        target: 'https://oj-project-backend-0m09.onrender.com',
+        target: 'https://oj-project-backend-x328.onrender.com',
         changeOrigin: true,
         secure: false,
       }
