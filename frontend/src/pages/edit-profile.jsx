@@ -44,7 +44,7 @@ const EditProfile = () => {
             }
 
             // Fetch fresh data from backend
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/profile`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -121,7 +121,7 @@ const EditProfile = () => {
                 updateData.append('avatar', avatarFile);
             }
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/update-profile`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/update-profile`, {
                 method: 'PUT',
                 credentials: 'include',
                 body: updateData

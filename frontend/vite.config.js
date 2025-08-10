@@ -6,19 +6,4 @@ export default defineConfig({
   plugins: [react(),
     tailwindcss(),
   ],
-  server: {
-    proxy: {
-      '/api/v1/compiler': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/api\/v1\/compiler/, ''),
-      },
-      '/api/v1': {
-        target: 'https://oj-project-backend-x328.onrender.com',
-        changeOrigin: true,
-        secure: false,
-      }
-    }
-  }
 })

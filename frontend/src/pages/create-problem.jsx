@@ -91,7 +91,7 @@ const CreateProblem = () => {
         try {
             setLoading(true);
             
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/create`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/create`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

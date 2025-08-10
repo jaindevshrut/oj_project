@@ -25,8 +25,7 @@ export default function Login({ onToggleForm }) {
           return handleError("Please fill all fields");
         }
         try{
-          const url = '/api/v1/users/login';
-          const response = await fetch(url, {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

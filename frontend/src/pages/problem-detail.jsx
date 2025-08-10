@@ -105,7 +105,7 @@ export default function ProblemDetail() {
     const fetchProblem = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/v1/problems/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/${id}`, {
                 credentials: 'include'
             });
 
@@ -126,7 +126,7 @@ export default function ProblemDetail() {
     const checkSubmissionStatus = async () => {
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`/api/v1/submissions/problem/${id}?limit=1`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/problem/${id}?limit=1`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -154,7 +154,7 @@ export default function ProblemDetail() {
         setOutput('> Running code...');
         console.log(selectedLanguage);
         try {
-            const response = await fetch(`/api/v1/compiler/run`, {
+            const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/run`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export default function ProblemDetail() {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`/api/v1/submissions/submit`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

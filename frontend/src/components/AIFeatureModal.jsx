@@ -31,7 +31,7 @@ export default function AIFeatureModal({
         setAiResult('');
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/ai-feature`, {
+            const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/ai-feature`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

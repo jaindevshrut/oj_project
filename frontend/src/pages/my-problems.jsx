@@ -42,7 +42,7 @@ const MyProblems = () => {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/${problemId}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/${problemId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

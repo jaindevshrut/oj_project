@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuthentication = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('/api/v1/users/me', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/me`, {
                 method: 'GET',
                 credentials: 'include',
             });

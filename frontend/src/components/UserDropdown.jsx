@@ -31,7 +31,7 @@ const UserDropdown = () => {
         setIsOpen(false);
         
         try {
-            const response = await fetch('/api/v1/users/logout', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/logout`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

@@ -10,7 +10,7 @@ export default function Header() {
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50">
-            <nav className="container mx-auto px-6 py-3">
+            <nav className="container mx-auto px-6 py-0.5">
                 <div className="flex justify-between items-center bg-white/90 backdrop-blur-lg border-2 border-black rounded-xl px-6 py-3 shadow-lg">
                     <h1 
                         className="text-2xl font-bold text-black cursor-pointer hover:text-gray-700 transition-colors border-b-2 border-transparent hover:border-black" 

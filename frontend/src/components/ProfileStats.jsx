@@ -18,7 +18,7 @@ const ProfileStats = ({ userId }) => {
 
     const fetchUserStats = async () => {
         try {
-            const response = await fetch('/api/v1/submissions/stats', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/stats`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {

@@ -29,7 +29,7 @@ export default function Landing() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/me`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/me`, {
                     method: 'GET',
                     credentials: 'include',
                 });
@@ -130,7 +130,7 @@ export default function Landing() {
         setShowAIModal(true);
         // Modal will handle the API request
         try {
-            const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/ai-feature`, {
+            const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/ai-feature`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ export default function Landing() {
         setOutput('> Running code...');
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/run`, {
+            const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/run`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

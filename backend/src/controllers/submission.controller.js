@@ -42,7 +42,7 @@ const submitCode = AsyncHandler(async (req, res) => {
 
     try {
         // Call compiler service to execute code
-        const compilerResponse = await fetch('http://localhost:8001/submit', {
+        const compilerResponse = await fetch(`${process.env.COMPILER_URL}/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

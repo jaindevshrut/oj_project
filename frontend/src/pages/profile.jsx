@@ -28,7 +28,7 @@ const Profile = () => {
             }
 
             // Then fetch fresh data from backend
-            const response = await fetch('/api/v1/users/profile', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -54,7 +54,7 @@ const Profile = () => {
 
     const fetchUserSubmissions = async () => {
         try {
-            const response = await fetch('/api/v1/submissions?limit=365', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions?limit=365`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {

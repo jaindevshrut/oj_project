@@ -19,7 +19,7 @@ const AIReview = ({ code, language, onClose }) => {
     setHasRequested(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_COMPILER_BASE_URL}/review`, {
+      const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

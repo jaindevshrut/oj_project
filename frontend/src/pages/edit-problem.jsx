@@ -21,7 +21,7 @@ const EditProblem = () => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/users/profile`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
                     credentials: 'include'
                 });
                 if (response.ok) {
@@ -38,7 +38,7 @@ const EditProblem = () => {
 
         const fetchProblem = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/${id}`, {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/${id}`, {
                     credentials: 'include'
                 });
 
@@ -122,7 +122,7 @@ const EditProblem = () => {
         setSaving(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

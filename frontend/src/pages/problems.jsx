@@ -43,7 +43,7 @@ const Problems = () => {
                 ...Object.fromEntries(Object.entries(filters).filter(([_, value]) => value))
             });
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems?${queryParams}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems?${queryParams}`, {
                 method: 'GET',
                 credentials: 'include',
             });

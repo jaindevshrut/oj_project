@@ -42,8 +42,7 @@ export default function Register({ onToggleForm }) {
         return handleError("Please fill all fields");
       }
       try{
-        const url = '/api/v1/users/register';
-        const response = await fetch(url, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

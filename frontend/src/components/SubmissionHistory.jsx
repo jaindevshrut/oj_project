@@ -26,10 +26,10 @@ const SubmissionHistory = ({ problemId = null }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('accessToken');
-            let url = `/api/v1/submissions?page=${currentPage}&limit=10`;
-            
+            let url = `${import.meta.env.VITE_BACKEND_URL}/submissions?page=${currentPage}&limit=10`;
+
             if (problemId) {
-                url = `/api/v1/submissions/problem/${problemId}?page=${currentPage}&limit=10`;
+                url = `${import.meta.env.VITE_BACKEND_URL}/submissions/problem/${problemId}?page=${currentPage}&limit=10`;
             }
             
             if (verdictFilter) {
@@ -58,7 +58,7 @@ const SubmissionHistory = ({ problemId = null }) => {
     const fetchSubmissionDetails = async (submissionId) => {
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch(`/api/v1/submissions/${submissionId}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/${submissionId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
