@@ -39,7 +39,8 @@ const SubmissionHistory = ({ problemId = null }) => {
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
 
             const data = await response.json();
@@ -61,7 +62,8 @@ const SubmissionHistory = ({ problemId = null }) => {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/${submissionId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
 
             const data = await response.json();

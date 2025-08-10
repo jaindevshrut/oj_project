@@ -129,7 +129,8 @@ export default function ProblemDetail() {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/problem/${id}?limit=1`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -201,7 +202,8 @@ export default function ProblemDetail() {
                     problemId: id,
                     language: selectedLanguage,
                     code: code
-                })
+                }),
+                credentials: 'include'
             });
 
             const result = await response.json();

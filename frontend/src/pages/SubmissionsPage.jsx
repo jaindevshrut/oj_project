@@ -17,7 +17,8 @@ const SubmissionsPage = () => {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/stats`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                credentials: 'include'
             });
 
             if (response.ok) {
