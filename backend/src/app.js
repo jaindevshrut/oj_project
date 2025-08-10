@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import rateLimit from "express-rate-limit"
 import path from "path"
+import healthcheckRouter from "./routes/healthcheck.routes.js"
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,12 +14,13 @@ app.use(rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 60 // max requests per IP per minute
 }));
+app.use("/api/v1/healthcheck", healthcheckRouter)
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true, // Allow cookies to be sent with requests
-    methods: ["GET", "POST", "PUT", "DELETE"], 
-    allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
-    
+  origin: process.env.CORS_ORIGIN,
+  credentials: true, // Allow cookies to be sent with requests
+  methods: ["GET", "POST", "PUT", "DELETE"], 
+  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
+  
 })) // using for defining the origin of the request
 app.use(express.json({limit: "16kb"})) // using for parsing the json data
 app.use(express.urlencoded({extended: true})) // using for parsing the form data (isse ham vo %20 ya + wali cheeze jo url me hoti h usse configure kr skte h) 
@@ -40,13 +42,11 @@ app.use((req, res, next) => {
 
 // Routes import
 import userRouter from './routes/user.routes.js'
-import healthcheckRouter from "./routes/healthcheck.routes.js"
 import problemRouter from "./routes/problem.routes.js"
 import submissionRouter from "./routes/submission.routes.js"
 
 // routes declaration
 app.use("/api/v1/users", userRouter)
-app.use("/api/v1/healthcheck", healthcheckRouter)
 app.use("/api/v1/problems", problemRouter)
 app.use("/api/v1/submissions", submissionRouter)
 
