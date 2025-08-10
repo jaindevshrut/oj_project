@@ -9,15 +9,33 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Fix: Correct the path structure - from src directory, need to go up one level
 const outputDir = path.join(__dirname, './public/temp/output');
 const codesDir = path.join(__dirname, './public/temp/codes');
 
-
 const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
     try {
+        // Fix: Add file existence checks before proceeding
+        if (!fs.existsSync(filePath)) {
+            return {
+                success: false,
+                error: 'Source file not found',
+                details: `File does not exist: ${filePath}`
+            };
+        }
+
+        if (!fs.existsSync(inputFile)) {
+            return {
+                success: false,
+                error: 'Input file not found',
+                details: `Input file does not exist: ${inputFile}`
+            };
+        }
+
         if (!fs.existsSync(outputDir)) {
             fs.mkdirSync(outputDir, { recursive: true });
         }
+        
         const jobId = path.basename(filePath).split('.')[0];
         const extension = path.extname(filePath);
         let outputFilePath = path.join(outputDir, jobId);
@@ -36,10 +54,7 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                 runCommand = `"${outputFilePath}" < "${inputFile}"`;
                 break;
             case '.java':
-                const className = path.basename(filePath, '.java');
-                const javaDir = path.dirname(filePath);
-                compileCommand = `javac "${filePath}"`;
-                runCommand = `cd "${javaDir}" && java ${className} < "${inputFile}"`;
+                runCommand = `java "${filePath}" < "${inputFile}"`;
                 break;
             case '.py':
                 runCommand = `python "${filePath}" < "${inputFile}"`;
@@ -63,6 +78,15 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                     };
                 }
                 
+                // Fix: For compiled languages, verify output file was created
+                if ((extension === '.c' || extension === '.cpp') && !fs.existsSync(outputFilePath)) {
+                    return {
+                        success: false,
+                        error: 'Compilation Failed',
+                        details: 'Executable file was not created'
+                    };
+                }
+                
             } catch (compileError) {
                 return {
                     success: false,
@@ -80,7 +104,6 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
             });
             const executionTime = Date.now() - startTime;
 
-            // Clean up only input file and executable (not source file)
             cleanupFiles(null, outputFilePath, inputFile, extension, false);
 
             if (stderr && !stderr.includes('warning')) {
@@ -90,7 +113,7 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                     details: stderr,
                     output: stdout || '',
                     executionTime: executionTime,
-                    filePath: filePath // Return file path for later cleanup
+                    filePath: filePath 
                 };
             }
 
@@ -99,11 +122,10 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                 output: stdout || '',
                 error: null,
                 executionTime: executionTime,
-                filePath: filePath // Return file path for later cleanup
+                filePath: filePath
             };
 
         } catch (executionError) {
-            // Clean up on error (only input file and executable, not source file)
             cleanupFiles(null, outputFilePath, inputFile, extension, false);
             
             const isTimeout = executionError.killed && executionError.signal === 'SIGTERM';
@@ -114,7 +136,8 @@ const executeFile = async (filePath, inputFile, timeLimit = 10000) => {
                 details: executionError.stderr || executionError.message,
                 timeout: isTimeout,
                 executionTime: isTimeout ? timeLimit : 0,
-                filePath: filePath // Return file path for later cleanup
+                output: executionError.stdout || '',
+                filePath: filePath
             };
         }
 
@@ -146,32 +169,18 @@ const cleanupFiles = (filePath, outputFilePath, inputFile, extension, cleanupSou
             fs.unlinkSync(outputFilePath);
         }
         
-        // Remove .class file for Java
-        if (extension === '.java' && filePath) {
-            const classFile = filePath.replace('.java', '.class');
-            if (fs.existsSync(classFile)) {
-                fs.unlinkSync(classFile);
-            }
-        }
+        
     } catch (cleanupError) {
         console.error('Error during cleanup:', cleanupError);
     }
 };
 
-// Function to cleanup source files after all test cases are done
 const cleanupSourceFile = (filePath, extension) => {
     try {
         if (filePath && fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
         
-        // Remove .class file for Java
-        if (extension === '.java' && filePath) {
-            const classFile = filePath.replace('.java', '.class');
-            if (fs.existsSync(classFile)) {
-                fs.unlinkSync(classFile);
-            }
-        }
     } catch (cleanupError) {
         console.error('Error during source file cleanup:', cleanupError);
     }

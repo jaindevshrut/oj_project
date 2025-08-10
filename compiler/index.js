@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 8001;
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN || "*",
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -70,7 +70,7 @@ app.post("/run", async (req, res) => {
         }
 
         // Execute file
-        console.log(`Executing file: ${fileResult.filePath}`);
+        console.log(`Executing fillllleeeee: ${fileResult.filePath}`);
         const executionResult = await executeFile(fileResult.filePath, InputFile.filePath);
 
         if (executionResult.success) {
