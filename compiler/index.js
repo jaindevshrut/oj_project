@@ -6,17 +6,8 @@ import createInputFile from "./src/createInputFile.js";
 import aiReview from "./src/aiReview.js";
 import aiFeatureRequest from "./src/aiFeatures.js";
 const app = express();
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.PORT || 8080;
 
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Routes
 app.get("/", (req, res) => {
     res.json({
         message: "Welcome to the Compiler API!",
@@ -26,6 +17,25 @@ app.get("/", (req, res) => {
         supportedLanguages: ["c", "cpp", "java", "py"]
     });
 });
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Routes
 
 app.post("/run", async (req, res) => {
     try {
