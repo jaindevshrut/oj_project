@@ -20,14 +20,8 @@ const Profile = () => {
         try {
             setLoading(true);
             
-            // First try to get user from localStorage
-            const localUser = localStorage.getItem('user');
-            if (localUser) {
-                const userData = JSON.parse(localUser);
-                setUser(userData);
-            }
 
-            // Then fetch fresh data from backend
+            // Always fetch fresh data from backend
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
                 method: 'GET',
                 credentials: 'include',
@@ -40,8 +34,6 @@ const Profile = () => {
                 const result = await response.json();
                 if (result.success && result.data) {
                     setUser(result.data);
-                    // Update localStorage with fresh data
-                    localStorage.setItem('user', JSON.stringify(result.data));
                 }
             }
         } catch (error) {
