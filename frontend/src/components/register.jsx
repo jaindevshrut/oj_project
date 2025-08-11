@@ -1,70 +1,95 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import InputField, { UserIcon, MailIcon, LockIcon } from './Inputfield';
 import {ToastContainer} from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
+import Hcaptchaa from './hcaptchaa';
 
 export default function Register({ onToggleForm }) {
-  const [token, setToken] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const captchaRef = useRef(null);
 
-  const onLoad = () => {
-    // this reaches out to the hCaptcha JS API and runs the
-    // execute function on it. you can use other functions as
-    // documented here:
-    // https://docs.hcaptcha.com/configuration#jsapi
-    captchaRef.current.execute();
+  const [registerInfo, setRegisterInfo] = useState({
+    fullName: '',
+    username: '',
+    email: '',
+    password: '',
+    accType: 'User'
+  });
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    setRegisterInfo({ ...registerInfo, [name]: value });
+  }
+
+  const handleCaptchaVerify = (token) => {
+    setCaptchaToken(token);
   };
 
-  useEffect(() => {
-    if (token)
-      console.log(`hCaptcha Token: ${token}`);
-  }, [token]);
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
 
-    const [registerInfo, setRegisterInfo] = useState({
-      fullName: '',
-      username: '',
-      email: '',
-      password: '',
-      accType: 'User'
-    });
+  const handleCaptchaError = (err) => {
+    setCaptchaToken(null);
+    handleError("Captcha verification failed. Please try again.");
+  };
 
-    const handleChange = async (e) => {
-      const { name, value } = e.target;
-      // console.log(`Input changed: ${name} = ${value}`);
-      setRegisterInfo({ ...registerInfo, [name]: value });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    const { fullName, username, email, password, accType } = registerInfo;
+    if(!fullName || !username || !email || !password || !accType) {
+      return handleError("Please fill all fields");
     }
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const { fullName, username, email, password, accType } = registerInfo;
-      if(!fullName || !username || !email || !password || !accType) {
-        return handleError("Please fill all fields");
-      }
-      try{
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(registerInfo)
-        });
-        const result = await response.json();
-        if (response.ok) {
-          const accountTypeMessage = registerInfo.accType === 'Problemsetter' 
-            ? "Problemsetter account created successfully! You can now create and manage coding problems." 
-            : "User account created successfully!";
-          handleSuccess(accountTypeMessage);
-          setTimeout(() =>{
-            onToggleForm();
-          },2000)
-        } else {
-          throw new Error(result.message || "Registration failed");
+    if (!captchaToken) {
+      return handleError("Please complete the captcha verification");
+    }
+
+    setIsSubmitting(true);
+
+    try{
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...registerInfo,
+          captchaToken
+        })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        const accountTypeMessage = registerInfo.accType === 'Problemsetter' 
+          ? "Problemsetter account created successfully! You can now create and manage coding problems." 
+          : "User account created successfully!";
+        handleSuccess(accountTypeMessage);
+        setTimeout(() =>{
+          onToggleForm();
+        },2000)
+      } else {
+        handleError(result.message || "Registration failed");
+        // Reset captcha on error
+        setCaptchaToken(null);
+        if (captchaRef.current) {
+          captchaRef.current.resetCaptcha();
         }
-      }catch(err) {
-        return handleError("Registration failed. Try again. : " + err.message);
       }
-    };
+    } catch(err) {
+      handleError("Registration failed. Try again. : " + err.message);
+      // Reset captcha on error
+      setCaptchaToken(null);
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
     
   return (
     <div className="p-8">
@@ -176,17 +201,23 @@ export default function Register({ onToggleForm }) {
           </div>
         </div>
 
-        {/* <HCaptcha
-        sitekey={import.meta.env.VITE_SECRET_KEY}
-        onLoad={onLoad}
-        onVerify={setToken}
-        ref={captchaRef}
-      /> */}
+        <Hcaptchaa 
+          ref={captchaRef}
+          onVerify={handleCaptchaVerify}
+          onExpire={handleCaptchaExpire}
+          onError={handleCaptchaError}
+        />
+        
         <button
           type="submit"
-          className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 rounded-lg transition duration-300 transform hover:scale-105 mt-4 shadow-lg hover:shadow-xl"
+          disabled={!captchaToken || isSubmitting}
+          className={`w-full py-3 rounded-lg transition duration-300 transform shadow-lg hover:shadow-xl mt-4 font-bold ${
+            captchaToken && !isSubmitting
+              ? 'bg-black hover:bg-gray-800 text-white hover:scale-105'
+              : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+          }`}
         >
-          Create Account
+          {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 

@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import InputField, { MailIcon, LockIcon, UserIcon } from './Inputfield';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {ToastContainer} from 'react-toastify';
 import { handleError, handleSuccess } from '../utils';
+import Hcaptchaa from './hcaptchaa';
 
 export default function Login({ onToggleForm }) {
   const [loginInfo, setLoginInfo] = useState({
     email: '',
     password: ''
   });
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const captchaRef = useRef(null);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -18,41 +22,77 @@ export default function Login({ onToggleForm }) {
     setLoginInfo({ ...loginInfo, [name]: value });
   }
 
+  const handleCaptchaVerify = (token) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
+
+  const handleCaptchaError = (err) => {
+    setCaptchaToken(null);
+    handleError("Captcha verification failed. Please try again.");
+  };
+
   const handleSubmit = async (e) => {
-        e.preventDefault();
-        const { email, password } = loginInfo;
-        if(!email || !password) {
-          return handleError("Please fill all fields");
+    e.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    const { email, password } = loginInfo;
+    if(!email || !password) {
+      return handleError("Please fill all fields");
+    }
+
+    if (!captchaToken) {
+      return handleError("Please complete the captcha verification");
+    }
+
+    setIsSubmitting(true);
+
+    try{
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...loginInfo,
+          captchaToken
+        })
+      });
+      const result = await response.json();
+      console.log('Login response:', result);
+      
+      if (response.ok && result.success) {
+        handleSuccess("Login successful!");
+        login(result.data.user);
+        
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        const errorMessage = result.message || "Login failed";
+        handleError(errorMessage);
+        // Reset captcha on error
+        setCaptchaToken(null);
+        if (captchaRef.current) {
+          captchaRef.current.resetCaptcha();
         }
-        try{
-          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include', // This is crucial for cookies
-            body: JSON.stringify(loginInfo)
-          });
-          const result = await response.json();
-          console.log('Login response:', result);
-          
-          if (response.ok && result.success) {
-            handleSuccess("Login successful!");
-            
-            // Use auth context login
-            login(result.data.user);
-            
-            setTimeout(() => {
-              navigate('/dashboard'); // Redirect to dashboard after login
-            }, 1000);
-          } else {
-            const errorMessage = result.message || "Login failed";
-            handleError(errorMessage);
-          }
-        }catch(err) {
-          return handleError("Network error. Please check your connection and try again.");
-        }
-      };
+      }
+    } catch(err) {
+      handleError("Network error. Please check your connection and try again.");
+      // Reset captcha on error
+      setCaptchaToken(null);
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="p-8">
@@ -81,11 +121,24 @@ export default function Login({ onToggleForm }) {
             Forgot Password?
           </a>
         </div>
+        
+        <Hcaptchaa 
+          ref={captchaRef}
+          onVerify={handleCaptchaVerify}
+          onExpire={handleCaptchaExpire}
+          onError={handleCaptchaError}
+        />
+        
         <button
           type="submit"
-          className="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          disabled={!captchaToken || isSubmitting}
+          className={`w-full mt-6 font-bold py-3 rounded-lg transition duration-300 transform shadow-lg hover:shadow-xl ${
+            captchaToken && !isSubmitting
+              ? 'bg-black hover:bg-gray-800 text-white hover:scale-105'
+              : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+          }`}
         >
-          Login
+          {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
 

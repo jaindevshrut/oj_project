@@ -4,6 +4,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/AsyncHandler.js";
 import jwt from "jsonwebtoken";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import { verifyHCaptcha } from "../utils/hcaptcha.js";
 const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId)
@@ -20,7 +21,11 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const { fullName, username, email, password, accType } = req.body
+    const { fullName, username, email, password, accType, captchaToken } = req.body
+    
+    // Verify hCaptcha first
+    await verifyHCaptcha(captchaToken, req.ip);
+    
     if (
         [fullName, username, email, password].some((field) => field?.trim() === "")
     ) {
@@ -59,7 +64,11 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body
+    const { email, password, captchaToken } = req.body
+    
+    // Verify hCaptcha first
+    await verifyHCaptcha(captchaToken, req.ip);
+    
     if (
         [email, password].some((field) => field?.trim() === "")
     ) {
