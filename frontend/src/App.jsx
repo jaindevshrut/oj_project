@@ -10,7 +10,6 @@ import MyProblems from './pages/my-problems.jsx';
 import ProblemDetail from './pages/problem-detail.jsx';
 import EditProblem from './pages/edit-problem.jsx';
 import SubmissionsPage from './pages/SubmissionsPage.jsx';
-import Landing from './pages/landing.jsx';
 import Home from './pages/home.jsx';
 import { Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
@@ -28,14 +27,6 @@ function AppContent() {
         <Routes>
           <Route 
             path='/' 
-            element={
-              <RouteWrapper title="Home">
-                <Landing />
-              </RouteWrapper>
-            } 
-          />
-          <Route 
-            path='/home' 
             element={
               <RouteWrapper title="Home">
                 <Home />

@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
                 
                 // Only redirect to dashboard if user is on auth page
                 if (location.pathname === '/auth') {
-                    navigate('/dashboard', { replace: true });
+                    navigate('/', { replace: true });
                 }
             } else {
                 setIsAuthenticated(false);
