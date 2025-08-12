@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const EditProblem = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [userAccType, setUserAccType] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -17,24 +18,19 @@ const EditProblem = () => {
     });
     const [testcases, setTestcases] = useState([{ input: '', output: '', visible: true }]);
 
-    // Load user account type and problem data
+    // Load problem data
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserAccType(data.data.accType);
-                } else {
-                    navigate('/auth');
-                }
-            } catch (error) {
-                console.error('Error fetching profile:', error);
-                navigate('/auth');
-            }
-        };
+        // Check user role
+        if (!user) {
+            navigate('/auth');
+            return;
+        }
+        
+        if (user?.accType !== 'Problemsetter' && user?.accType !== 'Admin') {
+            window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can edit problems.', 'error');
+            navigate('/dashboard');
+            return;
+        }
 
         const fetchProblem = async () => {
             try {
@@ -70,9 +66,8 @@ const EditProblem = () => {
             }
         };
 
-        fetchUserProfile();
         fetchProblem();
-    }, [id, navigate]);
+    }, [id, navigate, user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -168,7 +163,7 @@ const EditProblem = () => {
     }
 
     // Access control
-    if (userAccType && userAccType !== 'Problemsetter' && userAccType !== 'Admin') {
+    if (user && user.accType !== 'Problemsetter' && user.accType !== 'Admin') {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center pt-20 relative overflow-hidden">
                 {/* Background with blur effects */}

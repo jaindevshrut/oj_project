@@ -19,7 +19,13 @@ const AIReview = ({ code, language, onClose }) => {
     setHasRequested(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/review`, {
+      // Ensure we're using the correct URL variable
+      const compilerUrl = import.meta.env.VITE_COMPILER_URL;
+      if (!compilerUrl) {
+        throw new Error('Compiler URL is not defined in environment variables');
+      }
+      
+      const response = await fetch(`${compilerUrl}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

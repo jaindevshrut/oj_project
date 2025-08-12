@@ -14,7 +14,7 @@ const MyProblems = () => {
 
     const fetchMyProblems = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/problems/my-problems?page=${currentPage}&limit=10`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/problems/my-problems?page=${currentPage}&limit=10`, {
                 method: 'GET',
                 credentials: 'include'
             });

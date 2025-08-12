@@ -149,9 +149,15 @@ export default function ProblemDetail() {
 
         setIsRunning(true);
         setOutput('> Running code...');
-        console.log(selectedLanguage);
+        
         try {
-            const response = await fetch(`${import.meta.env.VITE_COMPILER_URL}/run`, {
+            // Ensure we're using the correct URL variable
+            const compilerUrl = import.meta.env.VITE_COMPILER_URL;
+            if (!compilerUrl) {
+                throw new Error('Compiler URL is not defined in environment variables');
+            }
+            
+            const response = await fetch(`${compilerUrl}/run`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

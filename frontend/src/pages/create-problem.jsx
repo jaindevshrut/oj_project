@@ -21,7 +21,7 @@ const CreateProblem = () => {
             navigate('/auth');
             return;
         }
-        if (user.accType !== 'Problemsetter' && user.accType !== 'Admin') {
+        if (user?.accType !== 'Problemsetter' && user?.accType !== 'Admin') {
             window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can create problems.', 'error');
             navigate('/dashboard');
         }
@@ -111,7 +111,7 @@ const CreateProblem = () => {
         }
     };
 
-    if (userAccType && userAccType !== 'Problemsetter' && userAccType !== 'Admin') {
+    if (user && user.accType !== 'Problemsetter' && user.accType !== 'Admin') {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center pt-20">
                 <div className="text-center">
