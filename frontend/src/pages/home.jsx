@@ -33,32 +33,17 @@ export default function Home() {
                     method: 'GET',
                     credentials: 'include',
                 });
-                
                 if (response.ok) {
                     const result = await response.json();
                     if (result.success && result.data) {
                         setIsAuthenticated(true);
                         setUser(result.data);
                     }
-                } else {
-                    // Check localStorage as fallback
-                    const localUser = localStorage.getItem('user');
-                    if (localUser) {
-                        setIsAuthenticated(true);
-                        setUser(JSON.parse(localUser));
-                    }
                 }
             } catch (error) {
                 console.error('Auth check error:', error);
-                // Check localStorage as fallback
-                const localUser = localStorage.getItem('user');
-                if (localUser) {
-                    setIsAuthenticated(true);
-                    setUser(JSON.parse(localUser));
-                }
             }
         };
-        
         checkAuth();
     }, []);
 

@@ -125,11 +125,7 @@ export default function ProblemDetail() {
 
     const checkSubmissionStatus = async () => {
         try {
-            const token = localStorage.getItem('accessToken');
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/problem/${id}?limit=1`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 credentials: 'include'
             });
 
@@ -191,12 +187,10 @@ export default function ProblemDetail() {
         setSubmitResult(null);
 
         try {
-            const token = localStorage.getItem('accessToken');
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     problemId: id,
@@ -216,8 +210,8 @@ export default function ProblemDetail() {
                 // Show success/failure toast based on verdict
                 const verdictType = result.data.verdict === 'Accepted' ? 'success' : 'error';
                 window.showToast && window.showToast(
-                    `Submission completed! Verdict: ${result.data.verdict}`, 
-                    verdictType, 
+                    `Submission completed! Verdict: ${result.data.verdict}`,
+                    verdictType,
                     5000
                 );
                 
@@ -228,14 +222,14 @@ export default function ProblemDetail() {
                     navigate('/auth');
                 } else {
                     window.showToast && window.showToast(
-                        result.message || 'Submission failed', 
+                        result.message || 'Submission failed',
                         'error'
                     );
                 }
             }
         } catch (error) {
             window.showToast && window.showToast(
-                'Error submitting solution: ' + error.message, 
+                'Error submitting solution: ' + error.message,
                 'error'
             );
         } finally {

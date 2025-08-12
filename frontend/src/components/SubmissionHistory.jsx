@@ -25,7 +25,6 @@ const SubmissionHistory = ({ problemId = null }) => {
     const fetchSubmissions = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('accessToken');
             let url = `${import.meta.env.VITE_BACKEND_URL}/submissions?page=${currentPage}&limit=10`;
 
             if (problemId) {
@@ -37,9 +36,6 @@ const SubmissionHistory = ({ problemId = null }) => {
             }
 
             const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 credentials: 'include'
             });
 
@@ -58,11 +54,7 @@ const SubmissionHistory = ({ problemId = null }) => {
 
     const fetchSubmissionDetails = async (submissionId) => {
         try {
-            const token = localStorage.getItem('accessToken');
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/${submissionId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 credentials: 'include'
             });
 

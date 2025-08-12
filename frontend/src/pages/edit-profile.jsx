@@ -27,22 +27,6 @@ const EditProfile = () => {
         try {
             setLoading(true);
             
-            // Get user from localStorage first
-            const localUser = localStorage.getItem('user');
-            if (localUser) {
-                const userData = JSON.parse(localUser);
-                setUser(userData);
-                setFormData({
-                    fullName: userData.fullName || '',
-                    username: userData.username || '',
-                    email: userData.email || '',
-                    gender: userData.gender || 'N',
-                    location: userData.location || '',
-                    website: userData.website || '',
-                    avatar: userData.avatar || ''
-                });
-            }
-
             // Fetch fresh data from backend
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
                 method: 'GET',
@@ -56,7 +40,6 @@ const EditProfile = () => {
                 const result = await response.json();
                 if (result.success && result.data) {
                     setUser(result.data);
-                    localStorage.setItem('user', JSON.stringify(result.data));
                     setFormData({
                         fullName: result.data.fullName || '',
                         username: result.data.username || '',
@@ -130,7 +113,7 @@ const EditProfile = () => {
             if (response.ok) {
                 const result = await response.json();
                 if (result.success) {
-                    localStorage.setItem('user', JSON.stringify(result.data));
+                    // No localStorage update
                     handleSuccess('Profile updated successfully!');
                     setTimeout(() => {
                         navigate('/profile');

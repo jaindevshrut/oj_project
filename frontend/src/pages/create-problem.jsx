@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreateProblem = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [userAccType, setUserAccType] = useState('');
-
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -17,20 +17,15 @@ const CreateProblem = () => {
     });
 
     useEffect(() => {
-        // Check user access type
-        const user = localStorage.getItem('user');
-        if (user) {
-            const userData = JSON.parse(user);
-            setUserAccType(userData.accType);
-            
-            if (userData.accType !== 'Problemsetter' && userData.accType !== 'Admin') {
-                window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can create problems.', 'error');
-                navigate('/dashboard');
-            }
-        } else {
+        if (!user) {
             navigate('/auth');
+            return;
         }
-    }, [navigate]);
+        if (user.accType !== 'Problemsetter' && user.accType !== 'Admin') {
+            window.showToast && window.showToast('Access denied. Only Problemsetters and Admins can create problems.', 'error');
+            navigate('/dashboard');
+        }
+    }, [navigate, user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;

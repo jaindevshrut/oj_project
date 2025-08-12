@@ -1,16 +1,10 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard() {
-    const [loggedInUser, setLoggedInUser] = useState({});
     const navigate = useNavigate();
-    
-    useEffect(() => {
-        const user = localStorage.getItem('user');
-        if (user) {
-            setLoggedInUser(JSON.parse(user));
-        }
-    }, []);
+    const { user: loggedInUser } = useAuth();
 
     const getAccountTypeBadge = (accType) => {
         switch (accType) {

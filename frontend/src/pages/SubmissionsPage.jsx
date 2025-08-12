@@ -13,11 +13,7 @@ const SubmissionsPage = () => {
 
     const fetchSubmissionStats = async () => {
         try {
-            const token = localStorage.getItem('accessToken');
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/submissions/stats`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 credentials: 'include'
             });
 
