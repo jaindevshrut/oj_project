@@ -25,7 +25,7 @@ export default function HoverCard({ children, className }) {
   }, []);
 
   return (
-    <div ref={cardRef} className={`relative bg-white/95 rounded-2xl border-2 border-black shadow-2xl overflow-hidden group backdrop-blur-lg ${className}`}>
+    <div ref={cardRef} className={`relative bg-white/95 rounded-2xl  border-black shadow-2xl overflow-hidden group backdrop-blur-lg ${className}`}>
         <div 
             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{

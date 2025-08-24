@@ -43,7 +43,7 @@ export default function ProblemDetail() {
             defaultCode: 'public class Main {\n    public static void main(String[] args) {\n        // Your code here\n    }\n}' 
         },
         { 
-            value: 'python', 
+            value: 'py', 
             label: 'Python', 
             monacoLanguage: 'python',
             defaultCode: '# Your Python code here\n' 
