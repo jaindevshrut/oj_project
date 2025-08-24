@@ -174,7 +174,7 @@ export default function ProblemDetail() {
             if (response.ok) {
                 setOutput(result.output || 'No output');
             } else {
-                setOutput(`Error: ${result.error || 'Unknown error occurred'}`);
+                setOutput(`${result.error}: ${result.details || 'Unknown error occurred'}`);
             }
         } catch (error) {
             setOutput(`Error: ${error.message}`);
