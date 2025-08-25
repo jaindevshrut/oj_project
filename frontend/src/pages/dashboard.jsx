@@ -39,8 +39,8 @@ function Dashboard() {
         }
     };
 
-  return (
-    <div className="bg-white text-black min-h-screen p-6">
+    return (
+        <div className="relative bg-white text-black h-screen overflow-y-hidden p-6">
         {/* Background blur effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white opacity-50 backdrop-blur-sm pointer-events-none"></div>
         
