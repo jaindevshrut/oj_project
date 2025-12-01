@@ -27,7 +27,7 @@ CodeJudge is a modern, full-featured online judge platform for competitive progr
 
 - **AI-Powered Features**
   - AI code review for submissions
-  - Smart suggestions and optimization tips
+  - Smart suggestions and optimisation tips
 
 - **Modern UI/UX**
   - Responsive design for all devices
@@ -123,7 +123,7 @@ Alternatively, you can use Docker:
 
 ```bash
 cd compiler
-docker build -t oj-compiler .
+docker build -t oj-compiler.
 docker run -p 8080:8080 oj-compiler
 ```
 
@@ -181,7 +181,7 @@ The API follows RESTful principles and uses JSON for data exchange.
 ### Submission Endpoints
 
 - `POST /api/v1/submissions/submit` - Submit a solution
-- `GET /api/v1/submissions` - Get user's submissions
+- `GET /api/v1/submissions` - Get the user's submissions
 - `GET /api/v1/submissions/:id` - Get a specific submission
 - `GET /api/v1/submissions/problem/:problemId` - Get submissions for a specific problem
 
@@ -240,11 +240,11 @@ Both services can be deployed using Docker or directly on a server with Node.js 
 
 ## 🔒 Security Features
 
-- HTTP-only cookies for JWT storage
-- hCaptcha integration for bot prevention
-- Secure code execution in isolated environments
-- Input validation and sanitization
-- Rate limiting for API endpoints
+- HTTP-only cookies for JWT storage.
+- hCaptcha integration for bot prevention.
+- Secure code execution in isolated environments.
+- Input validation and sanitisation.
+- Rate limiting for API endpoints.
 
 ## 📜 License
 
