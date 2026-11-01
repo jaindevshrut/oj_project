@@ -1,6 +1,5 @@
 # CodeJudge - Online Judge Platform
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-Web-brightgreen.svg)
 ![Node](https://img.shields.io/badge/node-v22-green.svg)
 
@@ -246,9 +245,7 @@ Both services can be deployed using Docker or directly on a server with Node.js 
 - Input validation and sanitisation.
 - Rate limiting for API endpoints.
 
-## 📜 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgements
 
